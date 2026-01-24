@@ -1,0 +1,435 @@
+<?xml version="1.0"?>
+<robot name="atlas_t" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  <!-- Properties -->
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="base_mass" value="75.0"/> <!-- kg -->
+  <xacro:property name="base_radius" value="0.3"/>
+  <xacro:property name="base_height" value="1.2"/>
+  <xacro:property name="wheel_radius" value="0.1"/>
+  <xacro:property name="wheel_width" value="0.05"/>
+  <xacro:property name="wheel_mass" value="2.0"/>
+  
+  <!-- Tether properties -->
+  <xacro:property name="tether_num_links" value="40"/>
+  <xacro:property name="tether_link_length" value="0.75"/> <!-- 40 * 0.75 = 30m total -->
+  <xacro:property name="tether_link_radius" value="0.01"/>
+  <xacro:property name="tether_link_mass" value="0.05"/>
+  
+  <!-- Colors -->
+  <material name="black">
+    <color rgba="0.1 0.1 0.1 1"/>
+  </material>
+  <material name="white">
+    <color rgba="0.9 0.9 0.9 1"/>
+  </material>
+  <material name="red">
+    <color rgba="0.8 0.1 0.1 1"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.2 0.3 0.8 1"/>
+  </material>
+  <material name="yellow">
+    <color rgba="0.9 0.9 0.1 1"/>
+  </material>
+
+  <!-- Base Link -->
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.6" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.5 0.4 1.2"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.6" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.5 0.4 1.2"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.6" rpy="0 0 0"/>
+      <mass value="${base_mass}"/>
+      <inertia ixx="10.0" ixy="0.0" ixz="0.0"
+               iyy="10.0" iyz="0.0"
+               izz="5.0"/>
+    </inertial>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Wheels (Differential Drive) -->
+  <xacro:macro name="wheel" params="prefix reflect">
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+                 iyy="0.01" iyz="0.0"
+                 izz="0.01"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0 ${reflect*0.25} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel prefix="left" reflect="1"/>
+  <xacro:wheel prefix="right" reflect="-1"/>
+
+  <!-- Caster Wheel (front) -->
+  <link name="front_caster">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="front_caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_caster"/>
+    <origin xyz="0.2 0 -0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- LiDAR Sensor (Velodyne VLP-16) -->
+  <link name="velodyne">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.07"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.07"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0"
+               iyy="0.001" iyz="0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="velodyne_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="velodyne"/>
+    <origin xyz="0 0 1.3" rpy="0 0 0"/>
+  </joint>
+
+  <!-- IMU Sensor -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <material name="yellow"/>
+    </visual>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.7" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Camera (RGB-D RealSense) -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.09 0.025"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.2 0 1.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Tether attachment point -->
+  <link name="tether_attachment">
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="tether_attachment_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="tether_attachment"/>
+    <origin xyz="-0.25 0 0.5" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Tether Links (Chain) -->
+  <xacro:macro name="tether_link" params="index">
+    <link name="tether_link_${index}">
+      <visual>
+        <origin xyz="0 0 ${tether_link_length/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${tether_link_radius}" length="${tether_link_length}"/>
+        </geometry>
+        <material name="yellow"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${tether_link_length/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${tether_link_radius}" length="${tether_link_length}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 ${tether_link_length/2}" rpy="0 0 0"/>
+        <mass value="${tether_link_mass}"/>
+        <inertial ixx="0.001" ixy="0" ixz="0"
+                 iyy="0.001" iyz="0"
+                 izz="0.0001"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- Generate tether chain -->
+  <xacro:macro name="tether_joint" params="index parent_link">
+    <joint name="tether_joint_${index}" type="continuous">
+      <parent link="${parent_link}"/>
+      <child link="tether_link_${index}"/>
+      <origin xyz="0 0 ${tether_link_length}" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping="0.7" friction="0.5"/>
+      <limit effort="10" velocity="10"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Generate all tether links and joints -->
+  <xacro:tether_link index="0"/>
+  <joint name="tether_joint_0" type="continuous">
+    <parent link="tether_attachment"/>
+    <child link="tether_link_0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.7" friction="0.5"/>
+  </joint>
+
+  <xacro:macro name="create_tether_chain" params="start end">
+    <xacro:if value="${start &lt; end}">
+      <xacro:tether_link index="${start}"/>
+      <xacro:tether_joint index="${start}" parent_link="tether_link_${start-1}"/>
+      <xacro:create_tether_chain start="${start+1}" end="${end}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:create_tether_chain start="1" end="${tether_num_links}"/>
+
+  <!-- Gazebo-specific configurations -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Blue</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <gazebo reference="left_wheel">
+    <material>Gazebo/Black</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+  </gazebo>
+
+  <gazebo reference="right_wheel">
+    <material>Gazebo/Black</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+  </gazebo>
+
+  <!-- Differential Drive Plugin -->
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <updateRate>50</updateRate>
+      <leftJoint>left_wheel_joint</leftJoint>
+      <rightJoint>right_wheel_joint</rightJoint>
+      <wheelSeparation>0.5</wheelSeparation>
+      <wheelDiameter>${2*wheel_radius}</wheelDiameter>
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>20</wheelTorque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+      <publishWheelTF>true</publishWheelTF>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <legacyMode>false</legacyMode>
+    </plugin>
+  </gazebo>
+
+  <!-- Velodyne LiDAR Plugin with Noise -->
+  <gazebo reference="velodyne">
+    <sensor type="ray" name="velodyne_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-${PI}</min_angle>
+            <max_angle>${PI}</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>16</samples>
+            <resolution>1</resolution>
+            <min_angle>-${15.0*PI/180.0}</min_angle>
+            <max_angle>${15.0*PI/180.0}</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.3</min>
+          <max>100.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.02</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
+        <topicName>/velodyne_points</topicName>
+        <frameName>velodyne</frameName>
+        <min_range>0.3</min_range>
+        <max_range>100.0</max_range>
+        <gaussianNoise>0.02</gaussianNoise>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- IMU Plugin with Noise and Drift -->
+  <gazebo reference="imu_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>/imu/data</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>/imu/data</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>100.0</updateRateHZ>
+        <gaussianNoise>0.01</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+  </gazebo>
+
+  <!-- Camera Plugin (RGB-D) -->
+  <gazebo reference="camera_link">
+    <sensor type="depth" name="camera">
+      <update_rate>20</update_rate>
+      <camera>
+        <horizontal_fov>1.047198</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>20.0</updateRate>
+        <cameraName>camera</cameraName>
+        <imageTopicName>/camera/color/image_raw</imageTopicName>
+        <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+        <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
+        <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+        <frameName>camera_link</frameName>
+        <pointCloudCutoff>0.5</pointCloudCutoff>
+        <pointCloudCutoffMax>8.0</pointCloudCutoffMax>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

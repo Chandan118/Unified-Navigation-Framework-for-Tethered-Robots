@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="warehouse_world">
+    
+    <!-- Physics -->
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <!-- Lighting -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- Ground Plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Base Station (Tether anchor point) -->
+    <model name="base_station">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="base_station_link">
+        <visual>
+          <geometry>
+            <box size="0.5 0.5 1.0</box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.2 0.2 1</ambient>
+            <diffuse>0.8 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+        <collision>
+          <geometry>
+            <box size="0.5 0.5 1.0</box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+
+    <!-- Dynamic Actor 0 -->
+    <actor name="actor_0">
+      <skin>
+        <filename>model://person_standing/meshes/standing.dae</filename>
+      </skin>
+      <pose>5.22912246428039 -17.045709086249694 1.0 0 0 0</pose>
+      <animation name="walking">
+        <filename>model://person_walking/meshes/walking.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <plugin name="actor_0_plugin" filename="libgazebo_ros_actor.so">
+        <target_x>-9.868003931663726</target_x>
+        <target_y>-11.83052297248449</target_y>
+        <velocity>0.5</velocity>
+        <obstacle_margin>1.0</obstacle_margin>
+        <animation_factor>5.0</animation_factor>
+      </plugin>
+    </actor>
+
+    <!-- Dynamic Actor 1 -->
+    <actor name="actor_1">
+      <skin>
+        <filename>model://person_standing/meshes/standing.dae</filename>
+      </skin>
+      <pose>8.998670136268792 -9.65593969808451 1.0 0 0 0</pose>
+      <animation name="walking">
+        <filename>model://person_walking/meshes/walking.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <plugin name="actor_1_plugin" filename="libgazebo_ros_actor.so">
+        <target_x>-15.355797625635574</target_x>
+        <target_y>18.597333182004554</target_y>
+        <velocity>0.5</velocity>
+        <obstacle_margin>1.0</obstacle_margin>
+        <animation_factor>5.0</animation_factor>
+      </plugin>
+    </actor>
+
+    <!-- Dynamic Actor 2 -->
+    <actor name="actor_2">
+      <skin>
+        <filename>model://person_standing/meshes/standing.dae</filename>
+      </skin>
+      <pose>-6.331836793251121 3.9654061717901143 1.0 0 0 0</pose>
+      <animation name="walking">
+        <filename>model://person_walking/meshes/walking.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <plugin name="actor_2_plugin" filename="libgazebo_ros_actor.so">
+        <target_x>-4.6657310830150145</target_x>
+        <target_y>-17.9900134858245</target_y>
+        <velocity>0.5</velocity>
+        <obstacle_margin>1.0</obstacle_margin>
+        <animation_factor>5.0</animation_factor>
+      </plugin>
+    </actor>
+
+    <!-- Dynamic Actor 3 -->
+    <actor name="actor_3">
+      <skin>
+        <filename>model://person_standing/meshes/standing.dae</filename>
+      </skin>
+      <pose>-19.555940370761697 5.452493449623002 1.0 0 0 0</pose>
+      <animation name="walking">
+        <filename>model://person_walking/meshes/walking.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <plugin name="actor_3_plugin" filename="libgazebo_ros_actor.so">
+        <target_x>12.064544677969778</target_x>
+        <target_y>-3.391122557500502</target_y>
+        <velocity>0.5</velocity>
+        <obstacle_margin>1.0</obstacle_margin>
+        <animation_factor>5.0</animation_factor>
+      </plugin>
+    </actor>
+
+    <!-- Dynamic Actor 4 -->
+    <actor name="actor_4">
+      <skin>
+        <filename>model://person_standing/meshes/standing.dae</filename>
+      </skin>
+      <pose>-12.439316404580296 -4.106194136421726 1.0 0 0 0</pose>
+      <animation name="walking">
+        <filename>model://person_walking/meshes/walking.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <plugin name="actor_4_plugin" filename="libgazebo_ros_actor.so">
+        <target_x>-2.874434211643056</target_x>
+        <target_y>14.819570875008566</target_y>
+        <velocity>0.5</velocity>
+        <obstacle_margin>1.0</obstacle_margin>
+        <animation_factor>5.0</animation_factor>
+      </plugin>
+    </actor>
+
+  </world>
+</sdf>

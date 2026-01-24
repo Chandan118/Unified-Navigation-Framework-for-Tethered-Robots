@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  simulation:
+    build: .
+    volumes:
+      - .:/catkin_ws/src/atlas_t_sim
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    network_mode: host
+    privileged: true
+    stdin_open: true
+    tty: true
+    command: /bin/bash -c "cd /catkin_ws && catkin_make && source devel/setup.bash && roslaunch hybrid_navigation master.launch"

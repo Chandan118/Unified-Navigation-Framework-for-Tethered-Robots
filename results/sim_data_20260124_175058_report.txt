@@ -1,0 +1,20 @@
+==========================================
+ATLAS-T SIMULATION PERFORMANCE REPORT
+==========================================
+Timestamp: 2026-01-24 17:51:14
+Source Data: sim_data_20260124_175058.csv
+
+CORE METRICS:
+- Total Simulation Time: 15.60 seconds
+- Total Distance Traveled: 12.70 meters
+- Average Speed: 0.81 m/s
+- Average Tether Tension: 2.53 N
+- Maximum Tether Tension: 7.35 N
+- Average Scene Complexity: 0.33
+
+NAVIGATION STATES (% OF TIME):
+- MOTION_TO_GOAL: 98.7%
+- Unknown: 1.3%
+
+==========================================
+ANALYSIS COMPLETE

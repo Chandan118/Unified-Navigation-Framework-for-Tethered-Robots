@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>atlas_description</name>
+  <version>1.0.0</version>
+  <description>URDF description for ATLAS-T tethered robot</description>
+  
+  <maintainer email="chandan@bit.edu.cn">Chandan Sheikder</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>joint_state_publisher</depend>
+  
+  <export>
+  </export>
+</package>
