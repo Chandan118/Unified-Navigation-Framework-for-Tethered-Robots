@@ -17,16 +17,16 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-rosdep \
     python3-catkin-tools \
+    python3-numpy \
+    python3-scipy \
+    python3-skimage \
+    python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages
+# Install remaining Python packages via pip
 RUN pip3 install --no-cache-dir \
-    numpy \
-    scipy \
     scikit-fuzzy \
-    opencv-python \
-    noise \
-    skimage
+    noise
 
 # Create workspace
 WORKDIR /catkin_ws

@@ -1,7 +1,7 @@
-# Adaptive Hybrid Navigation Framework for Tethered Robots
-## ROS 1 Noetic Implementation
+# Unified Navigation Framework for Tethered Robots
+## ROS 1 Noetic Implementation (Single & Swarm)
 
-This project implements a comprehensive simulation of the Adaptive Hybrid Navigation Framework for Tethered Robots as described in the research paper, using ROS 1 Noetic and Gazebo.
+This project implements a comprehensive simulation of the Adaptive Hybrid Navigation Framework for Tethered Robots, extended for **Swarm Robotics** (up to 10 robots) for high-level coordination and performance analysis.
 
 ## Features
 
@@ -22,7 +22,29 @@ This project implements a comprehensive simulation of the Adaptive Hybrid Naviga
 5. **Genetic Algorithm Optimizer**: Automatic parameter tuning
 6. **Tether Awareness**: Real-time tension calculation and snag detection
 
-## System Requirements
+### Swarm Robotics Extension
+- **Multi-Robot Coordination**: Centralized task allocation for 10 robots
+- **Namespace Isolation**: Full topic/node namespacing for each robot (`/robot_1`, `/robot_2`, etc.)
+- **Proximity Monitoring**: Real-time inter-robot spacing and collision warnings
+- **Swarm Data Logging**: Unified telemetry collection for all robots into a single CSV
+- **Aggregated Analytics**: Swarm-level metrics including workload balance and average tether stress
+
+## Containerized Environment (Recommended)
+
+To bypass dependency issues on modern hosts (e.g., Ubuntu 22.04), a Dockerized workflow is provided.
+
+### Prerequisites
+- Docker
+- Docker Compose (v1.29+)
+
+### Quick Start with Docker
+```bash
+cd atlas_ws
+# Build and run the swarm simulation
+docker-compose up --build
+```
+
+## System Requirements (Native)
 
 - **OS**: Ubuntu 20.04
 - **ROS**: ROS 1 Noetic
@@ -70,32 +92,24 @@ rosrun atlas_gazebo world_generator.py
 
 ## Usage
 
-### Quick Start - Full System
+### Swarm Simulation (10 Robots)
 ```bash
-# Terminal 1: Launch complete system
+# Launch centralized coordinator and all navigation stacks
+roslaunch hybrid_navigation master_swarm.launch
+```
+
+### Single Robot Simulation
+```bash
+# Launch complete single-robot system
 roslaunch hybrid_navigation master.launch
 ```
 
-### Step-by-Step Launch
-
+### Analyzing Results
+After running the simulation, data is saved in the `results/` folder. Use the analyzer to generate reports and plots:
 ```bash
-# Terminal 1: Start Gazebo with robot
-roslaunch atlas_gazebo spawn_robot.launch
-
-# Terminal 2: Start navigation stack
-roslaunch hybrid_navigation hybrid_navigation.launch
-
-# Terminal 3: Send navigation goal
-rostopic pub /move_base_simple/goal geometry_msgs/PoseStamped "header:
-  frame_id: 'odom'
-pose:
-  position:
-    x: 10.0
-    y: 10.0
-    z: 0.0
-  orientation:
-    w: 1.0"
+python3 result_analyzer.py
 ```
+*Note: The analyzer automatically detects if data is single-robot or multi-robot.*
 
 ## Monitoring and Visualization
 
@@ -228,22 +242,25 @@ rosrun hybrid_navigation waypoint_test.py
 - Install missing packages: `pip3 install <package>`
 - Verify node permissions: `chmod +x nodes/*.py`
 
-## Performance Metrics
+## Manuscript and Analysis
 
-The system can generate the following metrics for analysis:
+The repository includes the latest research manuscript and MATLAB-based data analysis scripts:
 
-1. **Path Efficiency**: Total path length / Optimal path length
-2. **Tether Stress**: Average and max tension over mission
-3. **Obstacle Avoidance**: Number of collisions avoided
-4. **State Transitions**: Frequency of FSM state changes
-5. **Parameter Convergence**: GA fitness over generations
+- **Integrated Analysis**: The Python `result_analyzer.py` has been updated to calculate core metrics (Path Efficiency, Collision Rate, Entanglement Risk) based on the mathematical models provided in the MATLAB scripts.
+
+## Advanced Performance Metrics
+
+The analysis framework now includes metrics derived from publication standards:
+1. **Path Efficiency (PLR %)**: Ratio of Euclidean distance to actual traveled path.
+2. **Inferred Collision Rate**: Detection of tension spikes and abrupt velocity changes per meter.
+3. **Entanglement Risk**: Evaluated based on recovery state frequency and high-tension duration.
 
 ## Citation
 
-If you use this code, please cite the original research paper:
+If you use this code, please cite the following paper:
 
-```
-[Paper Citation Here]
+```text
+Chandan Sheikder, Unified Navigation Framework for Tethered Robots, [Year].
 ```
 
 ## License

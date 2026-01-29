@@ -4,8 +4,7 @@ services:
   simulation:
     build: .
     volumes:
-      - .:/catkin_ws/src/atlas_t_sim
-      - /tmp/.X11-unix:/tmp/.X11-unix
+      - .:/catkin_ws
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
@@ -13,4 +12,4 @@ services:
     privileged: true
     stdin_open: true
     tty: true
-    command: /bin/bash -c "cd /catkin_ws && catkin_make && source devel/setup.bash && roslaunch hybrid_navigation master.launch"
+    command: /bin/bash -c "cd /catkin_ws && catkin_make && source devel/setup.bash && roslaunch hybrid_navigation master_swarm.launch"
