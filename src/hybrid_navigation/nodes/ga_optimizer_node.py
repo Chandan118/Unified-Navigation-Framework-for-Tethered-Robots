@@ -7,7 +7,6 @@ Optimizes fuzzy controller parameters based on fitness function (Eq. 17 from pap
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
-from r_msgs.msg import Path
 from nav_msgs.msg import Path as NavPath
 from hybrid_navigation_msgs.msg import TetherStatus
 import numpy as np
@@ -15,6 +14,7 @@ import random
 import os
 import json
 import time
+import math
 
 class GAOptimizer(Node):
     def __init__(self):
