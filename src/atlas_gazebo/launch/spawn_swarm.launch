@@ -1,0 +1,147 @@
+<launch>
+  <!-- Multi-robot spawn for ATLAS-T in Gazebo -->
+
+  <arg name="use_sim_time" default="true"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <!-- Gazebo world (shared by all robots) -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find atlas_gazebo)/worlds/warehouse_world.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="gui" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="verbose" value="true"/>
+  </include>
+
+  <!-- Robot 1 -->
+  <group ns="robot_1">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_1"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_1 -x 0 -y 0 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 2 -->
+  <group ns="robot_2">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_2 -x 2 -y 0 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 3 -->
+  <group ns="robot_3">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_3"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_3 -x -2 -y 0 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 4 -->
+  <group ns="robot_4">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_4"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_4 -x 0 -y 2 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 5 -->
+  <group ns="robot_5">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_5"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_5 -x 2 -y 2 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 6 -->
+  <group ns="robot_6">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_6"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_6 -x -2 -y 2 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 7 -->
+  <group ns="robot_7">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_7"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_7 -x 0 -y -2 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 8 -->
+  <group ns="robot_8">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_8"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_8 -x 2 -y -2 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 9 -->
+  <group ns="robot_9">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_9"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_9 -x -2 -y -2 -z 0.5"
+          output="screen"/>
+  </group>
+
+  <!-- Robot 10 -->
+  <group ns="robot_10">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find atlas_description)/urdf/atlas_t.xacro'"/>
+    <param name="tf_prefix" value="robot_10"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="false"/>
+    </node>
+    <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model atlas_t_10 -x 4 -y 0 -z 0.5"
+          output="screen"/>
+  </group>
+
+</launch>
