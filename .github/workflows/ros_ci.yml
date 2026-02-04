@@ -2,9 +2,9 @@ name: ROS 2 CI & Publish
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, ros2-development ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, ros2-development ]
 
 env:
   REGISTRY: ghcr.io
