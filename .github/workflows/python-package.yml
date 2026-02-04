@@ -40,6 +40,7 @@ jobs:
     
     - name: Test with pytest
       run: |
-        # Skip ROS 2 specific tests if rclpy is not installed (mocking would be needed for deeper tests)
+        # Skip ROS 2 specific tests if rclpy is not installed
         export PYTHONPATH=$PYTHONPATH:$(pwd)/src/hybrid_navigation:$(pwd)/src/atlas_mission_control
-        pytest src --ignore-glob='*node.py' --ignore-glob='*launch.py' || echo "Skipping ROS nodes/launch tests as they require rclpy environment"
+        # pytest returns exit code 5 if no tests are found. We treat this as success.
+        pytest src --ignore-glob='*node.py' --ignore-glob='*launch.py' || [ $? -eq 5 ]

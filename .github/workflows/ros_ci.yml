@@ -22,6 +22,11 @@ jobs:
         with:
           required-ros-distributions: humble
 
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install scikit-fuzzy numpy opencv-python
+
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.3
         with:
