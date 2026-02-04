@@ -1,34 +1,37 @@
 #!/usr/bin/env python3
 """
-Scene Recognition Node using CNN
+Scene Recognition Node using CNN (ROS 2 version)
 Classifies scenes as Simple, Moderate, or Complex
 """
 
-import rospy
+import rclpy
+from rclpy.node import Node
 import numpy as np
 import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-from hybrid_navigation.msg import SceneComplexity
+from hybrid_navigation_msgs.msg import SceneComplexity
 
-class SceneRecognitionNode:
+class SceneRecognitionNode(Node):
     def __init__(self):
-        rospy.init_node('scene_recognition_node', anonymous=False)
+        super().__init__('scene_recognition_node')
         
         self.bridge = CvBridge()
         
-        # Simple feature-based complexity calculation
-        # In a real implementation, this would be a trained CNN
-        self.complexity_threshold_low = 0.3
-        self.complexity_threshold_high = 0.7
+        # Parameters
+        self.declare_parameter('complexity_threshold_low', 0.3)
+        self.declare_parameter('complexity_threshold_high', 0.7)
+        
+        self.complexity_threshold_low = self.get_parameter('complexity_threshold_low').get_parameter_value().double_value
+        self.complexity_threshold_high = self.get_parameter('complexity_threshold_high').get_parameter_value().double_value
         
         # Publishers
-        self.scene_pub = rospy.Publisher('/scene_complexity', SceneComplexity, queue_size=1)
+        self.scene_pub = self.create_publisher(SceneComplexity, '/scene_complexity', 10)
         
         # Subscribers
-        rospy.Subscriber('/camera/color/image_raw', Image, self.image_callback)
+        self.create_subscription(Image, '/camera/color/image_raw', self.image_callback, 10)
         
-        rospy.loginfo("Scene Recognition Node initialized")
+        self.get_logger().info("Scene Recognition Node initialized (ROS 2)")
     
     def calculate_complexity(self, image):
         """
@@ -48,7 +51,7 @@ class SceneRecognitionNode:
         # Combine metrics
         complexity = (edge_density * 0.7 + variance * 0.3)
         
-        return np.clip(complexity, 0, 1)
+        return np.clip(complexity, 0.0, 1.0)
     
     def classify_scene(self, complexity):
         """Classify scene type based on complexity score"""
@@ -62,10 +65,8 @@ class SceneRecognitionNode:
     def detect_trap(self, image):
         """
         Simple trap detection (e.g., U-shaped obstacles)
-        In production, this would use trained object detection
         """
-        # Placeholder: detect based on image features
-        # Real implementation would use YOLO or similar
+        # Placeholder
         return False
     
     def image_callback(self, msg):
@@ -75,7 +76,7 @@ class SceneRecognitionNode:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
             
             # Calculate complexity
-            complexity_score = self.calculate_complexity(cv_image)
+            complexity_score = float(self.calculate_complexity(cv_image))
             scene_type = self.classify_scene(complexity_score)
             
             # Detect traps
@@ -83,7 +84,7 @@ class SceneRecognitionNode:
             
             # Create and publish message
             scene_msg = SceneComplexity()
-            scene_msg.header.stamp = rospy.Time.now()
+            scene_msg.header.stamp = self.get_clock().now().to_msg()
             scene_msg.header.frame_id = "camera_link"
             scene_msg.scene_type = scene_type
             scene_msg.complexity_score = complexity_score
@@ -92,14 +93,21 @@ class SceneRecognitionNode:
             
             self.scene_pub.publish(scene_msg)
             
-            rospy.logdebug("Scene: %s, Complexity: %.3f", scene_type, complexity_score)
+            self.get_logger().debug(f"Scene: {scene_type}, Complexity: {complexity_score:.3f}")
             
         except Exception as e:
-            rospy.logerr("Error processing image: %s", str(e))
+            self.get_logger().error(f"Error processing image: {str(e)}")
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = SceneRecognitionNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
-    try:
-        node = SceneRecognitionNode()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    main()

@@ -128,7 +128,7 @@
     <origin xyz="0.2 0 -0.05" rpy="0 0 0"/>
   </joint>
 
-  <!-- LiDAR Sensor (Velodyne VLP-16) -->
+  <!-- LiDAR Sensor -->
   <link name="velodyne">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -195,6 +195,13 @@
     </inertial>
   </link>
 
+  <link name="camera_link_optical"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="${-PI/2} 0 ${-PI/2}"/>
+    <parent link="camera_link"/>
+    <child link="camera_link_optical"/>
+  </joint>
+
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/>
     <child link="camera_link"/>
@@ -242,14 +249,13 @@
       <inertial>
         <origin xyz="0 0 ${tether_link_length/2}" rpy="0 0 0"/>
         <mass value="${tether_link_mass}"/>
-        <inertial ixx="0.001" ixy="0" ixz="0"
+        <inertia ixx="0.001" ixy="0" ixz="0"
                  iyy="0.001" iyz="0"
                  izz="0.0001"/>
       </inertial>
     </link>
   </xacro:macro>
 
-  <!-- Generate tether chain -->
   <xacro:macro name="tether_joint" params="index parent_link">
     <joint name="tether_joint_${index}" type="continuous">
       <parent link="${parent_link}"/>
@@ -261,7 +267,7 @@
     </joint>
   </xacro:macro>
 
-  <!-- Generate all tether links and joints -->
+  <!-- Generate tether chain -->
   <xacro:tether_link index="0"/>
   <joint name="tether_joint_0" type="continuous">
     <parent link="tether_attachment"/>
@@ -304,32 +310,32 @@
     <kd>100.0</kd>
   </gazebo>
 
-  <!-- Differential Drive Plugin -->
+  <!-- Differential Drive Plugin (ROS 2) -->
   <gazebo>
-    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <updateRate>50</updateRate>
-      <leftJoint>left_wheel_joint</leftJoint>
-      <rightJoint>right_wheel_joint</rightJoint>
-      <wheelSeparation>0.5</wheelSeparation>
-      <wheelDiameter>${2*wheel_radius}</wheelDiameter>
-      <wheelAcceleration>1.0</wheelAcceleration>
-      <wheelTorque>20</wheelTorque>
-      <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>odom</odometryTopic>
-      <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>base_footprint</robotBaseFrame>
-      <publishWheelTF>true</publishWheelTF>
-      <publishOdomTF>true</publishOdomTF>
-      <publishWheelJointState>true</publishWheelJointState>
-      <legacyMode>false</legacyMode>
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>/</namespace>
+      </ros>
+      <update_rate>50</update_rate>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.5</wheel_separation>
+      <wheel_diameter>${2*wheel_radius}</wheel_diameter>
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
     </plugin>
   </gazebo>
 
-  <!-- Velodyne LiDAR Plugin with Noise -->
+  <!-- LiDAR Sensor (ROS 2) -->
   <gazebo reference="velodyne">
     <sensor type="ray" name="velodyne_sensor">
       <pose>0 0 0 0 0 0</pose>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
         <scan>
@@ -357,39 +363,45 @@
           <stddev>0.02</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_laser.so">
-        <topicName>/velodyne_points</topicName>
-        <frameName>velodyne</frameName>
-        <min_range>0.3</min_range>
-        <max_range>100.0</max_range>
-        <gaussianNoise>0.02</gaussianNoise>
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>velodyne</frame_name>
       </plugin>
     </sensor>
   </gazebo>
 
-  <!-- IMU Plugin with Noise and Drift -->
+  <!-- IMU Plugin (ROS 2) -->
   <gazebo reference="imu_link">
-    <gravity>true</gravity>
     <sensor name="imu_sensor" type="imu">
       <always_on>true</always_on>
       <update_rate>100</update_rate>
       <visualize>true</visualize>
-      <topic>/imu/data</topic>
-      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-        <topicName>/imu/data</topicName>
-        <bodyName>imu_link</bodyName>
-        <updateRateHZ>100.0</updateRateHZ>
-        <gaussianNoise>0.01</gaussianNoise>
-        <xyzOffset>0 0 0</xyzOffset>
-        <rpyOffset>0 0 0</rpyOffset>
-        <frameName>imu_link</frameName>
-        <initialOrientationAsReference>false</initialOrientationAsReference>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=imu/data</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
       </plugin>
-      <pose>0 0 0 0 0 0</pose>
     </sensor>
   </gazebo>
 
-  <!-- Camera Plugin (RGB-D) -->
+  <!-- Camera Plugin (ROS 2) -->
   <gazebo reference="camera_link">
     <sensor type="depth" name="camera">
       <update_rate>20</update_rate>
@@ -405,29 +417,18 @@
           <far>8.0</far>
         </clip>
       </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
-        <baseline>0.2</baseline>
-        <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
-        <cameraName>camera</cameraName>
-        <imageTopicName>/camera/color/image_raw</imageTopicName>
-        <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
-        <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
-        <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
-        <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
-        <frameName>camera_link</frameName>
-        <pointCloudCutoff>0.5</pointCloudCutoff>
-        <pointCloudCutoffMax>8.0</pointCloudCutoffMax>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-        <CxPrime>0</CxPrime>
-        <Cx>0</Cx>
-        <Cy>0</Cy>
-        <focalLength>0</focalLength>
-        <hackBaseline>0</hackBaseline>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>camera/image_raw:=camera/color/image_raw</remapping>
+          <remapping>camera/depth/image_raw:=camera/depth/image_raw</remapping>
+          <remapping>camera/camera_info:=camera/color/camera_info</remapping>
+          <remapping>camera/depth/camera_info:=camera/depth/camera_info</remapping>
+          <remapping>camera/points:=camera/depth/points</remapping>
+        </ros>
+        <min_depth>0.05</min_depth>
+        <max_depth>8.0</max_depth>
+        <frame_name>camera_link_optical</frame_name>
       </plugin>
     </sensor>
   </gazebo>

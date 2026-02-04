@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
 project(atlas_description)
 
-find_package(catkin REQUIRED)
+# Find dependencies
+find_package(ament_cmake REQUIRED)
 
-catkin_package()
+# Install directories
+install(DIRECTORY launch config meshes urdf
+  DESTINATION share/${PROJECT_NAME}
+)
 
-install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY urdf DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY meshes DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+ament_package()

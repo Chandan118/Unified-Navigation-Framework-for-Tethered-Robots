@@ -1,10 +1,12 @@
 #!/bin/bash
 set -e
 
-# Source ROS and workspace
-source "/opt/ros/noetic/setup.bash"
-if [ -f "/catkin_ws/devel/setup.bash" ]; then
-    source "/catkin_ws/devel/setup.bash"
+# Source ROS 2 Humble base
+source "/opt/ros/humble/setup.bash"
+
+# Source the workspace if it exists
+if [ -f "/ros2_ws/install/setup.bash" ]; then
+  source "/ros2_ws/install/setup.bash"
 fi
 
 exec "$@"

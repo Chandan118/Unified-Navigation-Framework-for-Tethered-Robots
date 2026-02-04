@@ -2,26 +2,31 @@
 """
 Fuzzy Logic Controller Node for Hybrid Navigation
 Implements the Fuzzy Logic Controller described in Section 5.2 of the paper
-with 125 rules for navigation control
+with 125 rules for navigation control (ROS 2 version)
 """
 
-import rospy
+import rclpy
+from rclpy.node import Node
 import numpy as np
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 import std_msgs.msg
-from hybrid_navigation.msg import TetherStatus, SceneComplexity
+from hybrid_navigation_msgs.msg import TetherStatus, SceneComplexity
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
-class FuzzyNavigationController:
+class FuzzyNavigationController(Node):
     def __init__(self):
-        rospy.init_node('fuzzy_controller_node', anonymous=False)
+        super().__init__('fuzzy_controller_node')
         
         # Parameters
-        self.linear_speed_base = rospy.get_param('~linear_speed', 0.5)
-        self.max_angular_speed = rospy.get_param('~max_angular_speed', 1.0)
-        self.safety_distance = rospy.get_param('~safety_distance', 1.0)
+        self.declare_parameter('linear_speed', 0.5)
+        self.declare_parameter('max_angular_speed', 1.0)
+        self.declare_parameter('safety_distance', 1.0)
+        
+        self.linear_speed_base = self.get_parameter('linear_speed').get_parameter_value().double_value
+        self.max_angular_speed = self.get_parameter('max_angular_speed').get_parameter_value().double_value
+        self.safety_distance = self.get_parameter('safety_distance').get_parameter_value().double_value
         
         # State variables
         self.min_obstacle_distance = float('inf')
@@ -34,18 +39,19 @@ class FuzzyNavigationController:
         self.setup_fuzzy_system()
         
         # Publishers
-        self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
+        self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         
         # Subscribers
-        rospy.Subscriber('/scan', LaserScan, self.scan_callback)
-        rospy.Subscriber('/tether_status', TetherStatus, self.tether_callback)
-        rospy.Subscriber('/scene_complexity', SceneComplexity, self.scene_callback)
-        rospy.Subscriber('/goal_angle', std_msgs.msg.Float32, self.goal_angle_callback)
+        self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
+        self.create_subscription(TetherStatus, '/tether_status', self.tether_callback, 10)
+        self.create_subscription(SceneComplexity, '/scene_complexity', self.scene_callback, 10)
+        self.create_subscription(std_msgs.msg.Float32, '/goal_angle', self.goal_angle_callback, 10)
         
         # Control loop timer
-        self.control_rate = rospy.Rate(10)  # 10 Hz
+        timer_period = 0.1  # 10 Hz
+        self.timer = self.create_timer(timer_period, self.compute_control)
         
-        rospy.loginfo("Fuzzy Navigation Controller initialized")
+        self.get_logger().info("Fuzzy Navigation Controller initialized (ROS 2)")
     
     def setup_fuzzy_system(self):
         """Setup fuzzy logic membership functions and rules"""
@@ -171,7 +177,7 @@ class FuzzyNavigationController:
         self.control_system = ctrl.ControlSystem(rules)
         self.controller = ctrl.ControlSystemSimulation(self.control_system)
         
-        rospy.loginfo("Fuzzy logic system initialized with %d rules", len(rules))
+        self.get_logger().info(f"Fuzzy logic system initialized with {len(rules)} rules")
     
     def scan_callback(self, msg):
         """Process laser scan data"""
@@ -209,8 +215,8 @@ class FuzzyNavigationController:
             self.controller.compute()
             
             # Get outputs
-            linear_vel = self.controller.output['linear_vel']
-            angular_vel = self.controller.output['angular_vel']
+            linear_vel = float(self.controller.output['linear_vel'])
+            angular_vel = float(self.controller.output['angular_vel'])
             
             # Create and publish command
             cmd = Twist()
@@ -218,25 +224,23 @@ class FuzzyNavigationController:
             cmd.angular.z = angular_vel
             self.cmd_vel_pub.publish(cmd)
             
-            rospy.logdebug("Control: lin=%.2f, ang=%.2f | dist=%.2f, tension=%.2f", 
-                          linear_vel, angular_vel, self.min_obstacle_distance, self.tether_tension)
+            self.get_logger().debug(f"Control: lin={linear_vel:.2f}, ang={angular_vel:.2f} | dist={self.min_obstacle_distance:.2f}, tension={self.tether_tension:.2f}")
             
         except Exception as e:
-            rospy.logwarn("Fuzzy control computation failed: %s", str(e))
+            self.get_logger().warn(f"Fuzzy control computation failed: {str(e)}")
             # Publish stop command on error
             self.cmd_vel_pub.publish(Twist())
-    
-    def run(self):
-        """Main control loop"""
-        rospy.loginfo("Fuzzy controller running...")
-        
-        while not rospy.is_shutdown():
-            self.compute_control()
-            self.control_rate.sleep()
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = FuzzyNavigationController()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
-    try:
-        controller = FuzzyNavigationController()
-        controller.run()
-    except rospy.ROSInterruptException:
-        pass
+    main()

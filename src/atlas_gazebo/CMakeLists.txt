@@ -1,20 +1,12 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
 project(atlas_gazebo)
 
-find_package(catkin REQUIRED COMPONENTS
-  gazebo_ros
+# Find dependencies
+find_package(ament_cmake REQUIRED)
+
+# Install directories
+install(DIRECTORY launch models worlds scripts
+  DESTINATION share/${PROJECT_NAME}
 )
 
-find_package(gazebo REQUIRED)
-
-catkin_package(
-  DEPENDS 
-    gazebo_ros
-)
-
-include_directories(${GAZEBO_INCLUDE_DIRS})
-link_directories(${GAZEBO_LIBRARY_DIRS})
-
-install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY worlds DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY models DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+ament_package()
