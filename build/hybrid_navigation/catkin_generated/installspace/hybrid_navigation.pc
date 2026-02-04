@@ -1,8 +1,0 @@
-prefix=/catkin_ws/install
-
-Name: hybrid_navigation
-Description: Description of hybrid_navigation
-Version: 1.0.0
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib 
-Requires: rospy roscpp std_msgs geometry_msgs sensor_msgs nav_msgs visualization_msgs tf tf2_ros message_runtime
