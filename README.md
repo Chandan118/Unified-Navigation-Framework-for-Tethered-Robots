@@ -28,6 +28,7 @@ This project implements a comprehensive simulation of the Adaptive Hybrid Naviga
 - **Proximity Monitoring**: Real-time inter-robot spacing and collision warnings
 - **Swarm Data Logging**: Unified telemetry collection for all robots into a single CSV
 - **Aggregated Analytics**: Swarm-level metrics including workload balance and average tether stress
+- **Mission Management**: New `atlas_mission_control` package for high-level state monitoring and emergency handling
 
 ## Containerized Environment (Recommended)
 
