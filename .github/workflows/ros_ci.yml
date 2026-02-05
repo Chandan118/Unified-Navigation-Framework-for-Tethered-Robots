@@ -8,15 +8,19 @@ on:
 
 jobs:
   ros_build_test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: ros:noetic-ros-base
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup ROS Noetic
-        uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: noetic
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip build-essential git wget python3-catkin-pkg python3-empy python3-nose
+          # sudo might not be in the container, but action-ros-ci might need it or we assume root.
+          # ros:noetic images usually run as root.
 
       - name: Install Python dependencies
         run: |
