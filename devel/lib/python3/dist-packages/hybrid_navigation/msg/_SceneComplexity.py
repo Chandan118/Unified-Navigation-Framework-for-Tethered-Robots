@@ -88,13 +88,13 @@ string frame_id
       buff.write(_get_struct_3I().pack(_x.header.seq, _x.header.stamp.secs, _x.header.stamp.nsecs))
       _x = self.header.frame_id
       length = len(_x)
-      if python3 or type(_x) == unicode:
+      if isinstance(_x, str):
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self.scene_type
       length = len(_x)
-      if python3 or type(_x) == unicode:
+      if isinstance(_x, str):
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
@@ -157,13 +157,13 @@ string frame_id
       buff.write(_get_struct_3I().pack(_x.header.seq, _x.header.stamp.secs, _x.header.stamp.nsecs))
       _x = self.header.frame_id
       length = len(_x)
-      if python3 or type(_x) == unicode:
+      if isinstance(_x, str):
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self.scene_type
       length = len(_x)
-      if python3 or type(_x) == unicode:
+      if isinstance(_x, str):
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
@@ -217,7 +217,6 @@ string frame_id
 
 _struct_I = genpy.struct_I
 def _get_struct_I():
-    global _struct_I
     return _struct_I
 _struct_2fB = None
 def _get_struct_2fB():
