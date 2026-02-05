@@ -12,7 +12,7 @@ env:
 
 jobs:
   ros_build_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -36,7 +36,7 @@ jobs:
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
 
   publish_image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: ros_build_test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     permissions:
