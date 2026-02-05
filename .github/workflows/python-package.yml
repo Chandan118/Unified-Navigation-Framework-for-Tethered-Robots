@@ -41,8 +41,9 @@ jobs:
     - name: Lint with flake8
       run: |
         # Use the .flake8 configuration file and target ONLY the src directory
-        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 src/ --count --exit-zero --statistics
+        # Explicitly exclude build artifacts as a fail-safe
+        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=devel,build,install
+        flake8 src/ --count --exit-zero --statistics --exclude=devel,build,install
 
     - name: Test with pytest
       run: |

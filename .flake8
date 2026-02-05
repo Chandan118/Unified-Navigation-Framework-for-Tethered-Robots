@@ -12,7 +12,9 @@ exclude =
     .eggs,
     *.egg,
     assets,
-    docs
+    docs,
+    devel/*,
+    build/*
 
 # Standard ROS 2 linting rules
 max-line-length = 127
