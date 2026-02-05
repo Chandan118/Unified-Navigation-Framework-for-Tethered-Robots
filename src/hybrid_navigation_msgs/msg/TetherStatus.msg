@@ -1,5 +1,5 @@
 # Custom message for tether status
-Header header
+std_msgs/Header header
 float32 length
 float32 tension
 float32 max_length
