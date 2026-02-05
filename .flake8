@@ -1,0 +1,23 @@
+[flake8]
+# Exclude ROS build artifacts and common junk
+exclude =
+    .git,
+    __pycache__,
+    build,
+    devel,
+    install,
+    log,
+    dist,
+    .tox,
+    .eggs,
+    *.egg,
+    assets,
+    docs,
+    devel/*,
+    build/*
+
+# Standard ROS 2 linting rules
+max-line-length = 127
+max-complexity = 10
+select = E,W,F,C
+ignore = E203, W503

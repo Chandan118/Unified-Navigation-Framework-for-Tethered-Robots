@@ -5,9 +5,9 @@ name: Python package
 
 on:
   push:
-    branches: [ "main", "master", "ros2-development", "fix/flake8-python3-unicode" ]
+    branches: [ "main", "master", "ros2-development" ]
   pull_request:
-    branches: [ "main", "master", "ros2-development", "fix/flake8-python3-unicode" ]
+    branches: [ "main", "master", "ros2-development" ]
 
 jobs:
   build:

@@ -1,29 +1,33 @@
 #!/usr/bin/env python3
 """
-Swarm Data Logger Node for ATLAS-T Simulation
+Swarm Data Logger Node for ATLAS-T Simulation (ROS 2 version)
 Records per-robot metrics to a CSV file for swarm performance analysis.
 """
 
 import csv
 import os
 from datetime import datetime
-
-import rospy
+import rclpy
+from rclpy.node import Node
 from nav_msgs.msg import Odometry
-from hybrid_navigation.msg import TetherStatus, SceneComplexity
+from hybrid_navigation_msgs.msg import TetherStatus, SceneComplexity
 from std_msgs.msg import String
 
-
-class SwarmDataLoggerNode:
+class SwarmDataLoggerNode(Node):
     def __init__(self):
-        rospy.init_node("swarm_data_logger_node", anonymous=False)
+        super().__init__('swarm_data_logger_node')
 
         # Parameters
         default_dir = os.path.join(os.environ.get("HOME", "/tmp"), "atlas_ws", "results")
-        self.log_dir = rospy.get_param("~log_dir", default_dir)
-        self.robot_count = rospy.get_param("~robot_count", 10)
-        self.robot_prefix = rospy.get_param("~robot_prefix", "robot_")
-        self.log_rate = rospy.get_param("~log_rate", 5.0)  # Hz
+        self.declare_parameter('log_dir', default_dir)
+        self.declare_parameter('robot_count', 10)
+        self.declare_parameter('robot_prefix', 'robot_')
+        self.declare_parameter('log_rate', 5.0)
+
+        self.log_dir = self.get_parameter('log_dir').get_parameter_value().string_value
+        self.robot_count = self.get_parameter('robot_count').get_parameter_value().integer_value
+        self.robot_prefix = self.get_parameter('robot_prefix').get_parameter_value().string_value
+        self.log_rate = self.get_parameter('log_rate').get_parameter_value().double_value
 
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
@@ -49,14 +53,8 @@ class SwarmDataLoggerNode:
 
         # CSV setup
         self.fieldnames = [
-            "timestamp",
-            "robot_id",
-            "pos_x",
-            "pos_y",
-            "tether_length",
-            "tether_tension",
-            "complexity_score",
-            "planner_state",
+            "timestamp", "robot_id", "pos_x", "pos_y", 
+            "tether_length", "tether_tension", "complexity_score", "planner_state"
         ]
         self.csv_file = open(self.filename, "w", newline="")
         self.csv_writer = csv.DictWriter(self.csv_file, fieldnames=self.fieldnames)
@@ -67,67 +65,55 @@ class SwarmDataLoggerNode:
             robot_id = f"{self.robot_prefix}{i}"
             ns = f"/{robot_id}"
 
-            rospy.Subscriber(f"{ns}/odom", Odometry, self._make_odom_cb(robot_id))
-            rospy.Subscriber(f"{ns}/tether_status", TetherStatus, self._make_tether_cb(robot_id))
-            rospy.Subscriber(
-                f"{ns}/scene_complexity", SceneComplexity, self._make_scene_cb(robot_id)
-            )
-            rospy.Subscriber(f"{ns}/planner_state", String, self._make_state_cb(robot_id))
+            self.create_subscription(Odometry, f"{ns}/odom", self._make_odom_cb(robot_id), 10)
+            self.create_subscription(TetherStatus, f"{ns}/tether_status", self._make_tether_cb(robot_id), 10)
+            self.create_subscription(SceneComplexity, f"{ns}/scene_complexity", self._make_scene_cb(robot_id), 10)
+            self.create_subscription(String, f"{ns}/planner_state", self._make_state_cb(robot_id), 10)
 
         # Timer for periodic logging
         period = 1.0 / self.log_rate if self.log_rate > 0 else 0.2
-        rospy.Timer(rospy.Duration(period), self.log_data)
+        self.timer = self.create_timer(period, self.log_data)
 
-        rospy.loginfo("Swarm Data Logger initialized. Saving to %s", self.filename)
+        self.get_logger().info(f"Swarm Data Logger initialized. Saving to {self.filename}")
 
     def _make_odom_cb(self, robot_id):
-        def cb(msg):
-            data = self.robot_data[robot_id]
-            data["pos_x"] = msg.pose.pose.position.x
-            data["pos_y"] = msg.pose.pose.position.y
-
-        return cb
+        return lambda msg: self._update_data(robot_id, {'pos_x': msg.pose.pose.position.x, 'pos_y': msg.pose.pose.position.y})
 
     def _make_tether_cb(self, robot_id):
-        def cb(msg):
-            data = self.robot_data[robot_id]
-            data["tether_length"] = msg.length
-            data["tether_tension"] = msg.tension
-
-        return cb
+        return lambda msg: self._update_data(robot_id, {'tether_length': msg.length, 'tether_tension': msg.tension})
 
     def _make_scene_cb(self, robot_id):
-        def cb(msg):
-            data = self.robot_data[robot_id]
-            data["complexity_score"] = msg.complexity_score
-
-        return cb
+        return lambda msg: self._update_data(robot_id, {'complexity_score': msg.complexity_score})
 
     def _make_state_cb(self, robot_id):
-        def cb(msg):
-            data = self.robot_data[robot_id]
-            data["planner_state"] = msg.data
+        return lambda msg: self._update_data(robot_id, {'planner_state': msg.data})
 
-        return cb
+    def _update_data(self, robot_id, new_values):
+        if robot_id in self.robot_data:
+            self.robot_data[robot_id].update(new_values)
 
-    def log_data(self, event):
-        if rospy.is_shutdown():
-            return
-
-        now = rospy.get_time()
+    def log_data(self):
+        now = self.get_clock().now().nanoseconds / 1e9
         for robot_id, data in self.robot_data.items():
             data["timestamp"] = now
             self.csv_writer.writerow(data)
         self.csv_file.flush()
 
-    def __del__(self):
+    def destroy_node(self):
         if hasattr(self, "csv_file"):
             self.csv_file.close()
+        super().destroy_node()
 
+def main(args=None):
+    rclpy.init(args=args)
+    node = SwarmDataLoggerNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
-    try:
-        node = SwarmDataLoggerNode()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    main()

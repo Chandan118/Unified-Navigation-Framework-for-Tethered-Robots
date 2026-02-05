@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """
-Sensor Fusion Node with Extended Kalman Filter
+Sensor Fusion Node with Extended Kalman Filter (ROS 2 version)
 Implements dynamic weight adjustment based on sensor variance (Eq. 8-9 from paper)
 """
 
-import rospy
+import rclpy
+from rclpy.node import Node
 import numpy as np
 from sensor_msgs.msg import LaserScan, Imu
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseWithCovarianceStamped
-import tf
+from geometry_msgs.msg import PoseWithCovarianceStamped, TransformStamped
+import tf2_ros
+import math
 
-class SensorFusionNode:
+class SensorFusionNode(Node):
     def __init__(self):
-        rospy.init_node('sensor_fusion_node', anonymous=False)
+        super().__init__('sensor_fusion_node')
         
         # State: [x, y, theta, vx, vy, omega]
         self.state = np.zeros(6)
@@ -33,7 +35,7 @@ class SensorFusionNode:
         # Sensor data buffers
         self.odom_data = None
         self.imu_data = None
-        self.last_update_time = rospy.Time.now()
+        self.last_update_time = self.get_clock().now()
         
         # Variance trackers for dynamic weight adjustment
         self.odom_variance_history = []
@@ -41,39 +43,39 @@ class SensorFusionNode:
         self.variance_window_size = 10
         
         # Publishers
-        self.fused_pose_pub = rospy.Publisher('/fused_pose', PoseWithCovarianceStamped, queue_size=1)
-        self.tf_broadcaster = tf.TransformBroadcaster()
+        self.fused_pose_pub = self.create_publisher(PoseWithCovarianceStamped, '/fused_pose', 10)
+        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         
         # Subscribers
-        rospy.Subscriber('/odom', Odometry, self.odom_callback)
-        rospy.Subscriber('/imu/data', Imu, self.imu_callback)
+        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(Imu, '/imu/data', self.imu_callback, 10)
         
-        # Timer for EKF update
-        rospy.Timer(rospy.Duration(0.1), self.ekf_update)
+        # Timer for EKF update (10 Hz)
+        timer_period = 0.1
+        self.timer = self.create_timer(timer_period, self.ekf_update)
         
-        rospy.loginfo("Sensor Fusion Node initialized")
+        self.get_logger().info("Sensor Fusion Node initialized (ROS 2)")
     
     def odom_callback(self, msg):
         """Store odometry data"""
         self.odom_data = msg
         
         # Track variance
-        if hasattr(msg.pose, 'covariance'):
-            variance = np.mean(msg.pose.covariance[0:3])  # x, y variance
-            self.odom_variance_history.append(variance)
-            if len(self.odom_variance_history) > self.variance_window_size:
-                self.odom_variance_history.pop(0)
+        # msg.pose.covariance is a list of 36 floats
+        variance = np.mean(msg.pose.covariance[0:3])  # Average of x, y, z variance
+        self.odom_variance_history.append(variance)
+        if len(self.odom_variance_history) > self.variance_window_size:
+            self.odom_variance_history.pop(0)
     
     def imu_callback(self, msg):
         """Store IMU data"""
         self.imu_data = msg
         
         # Track variance
-        if hasattr(msg.orientation_covariance, '__iter__'):
-            variance = np.mean(msg.orientation_covariance[0:3])
-            self.imu_variance_history.append(variance)
-            if len(self.imu_variance_history) > self.variance_window_size:
-                self.imu_variance_history.pop(0)
+        variance = np.mean(msg.orientation_covariance[0:3])
+        self.imu_variance_history.append(variance)
+        if len(self.imu_variance_history) > self.variance_window_size:
+            self.imu_variance_history.pop(0)
     
     def calculate_dynamic_weights(self):
         """
@@ -84,16 +86,12 @@ class SensorFusionNode:
             avg_odom_var = np.mean(self.odom_variance_history)
             avg_imu_var = np.mean(self.imu_variance_history)
             
-            # Avoid division by zero
             if avg_odom_var + avg_imu_var > 0:
-                # Inverse variance weighting
                 self.weight_odom = avg_imu_var / (avg_odom_var + avg_imu_var)
                 self.weight_imu = avg_odom_var / (avg_odom_var + avg_imu_var)
             else:
                 self.weight_odom = 0.5
                 self.weight_imu = 0.5
-            
-            rospy.logdebug("Dynamic weights: odom=%.3f, imu=%.3f", self.weight_odom, self.weight_imu)
     
     def predict(self, dt):
         """EKF Prediction step"""
@@ -116,35 +114,22 @@ class SensorFusionNode:
         
         # Measurement model (observe x, y, theta)
         H = np.zeros((3, 6))
-        H[0, 0] = 1  # x
-        H[1, 1] = 1  # y
-        H[2, 2] = 1  # theta
+        H[0, 0] = 1; H[1, 1] = 1; H[2, 2] = 1
         
-        # Get measurement
         x_meas = self.odom_data.pose.pose.position.x
         y_meas = self.odom_data.pose.pose.position.y
         
-        # Extract theta from quaternion
-        orientation_q = self.odom_data.pose.pose.orientation
-        _, _, theta_meas = tf.transformations.euler_from_quaternion([
-            orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w
-        ])
+        # Quaternion to theta
+        q = self.odom_data.pose.pose.orientation
+        siny_cosp = 2 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
+        theta_meas = math.atan2(siny_cosp, cosy_cosp)
         
         z = np.array([x_meas, y_meas, theta_meas])
-        
-        # Innovation
         y = z - H @ self.state
-        
-        # Innovation covariance
         S = H @ self.P @ H.T + self.R_odom * self.weight_odom
-        
-        # Kalman gain
         K = self.P @ H.T @ np.linalg.inv(S)
-        
-        # Update state
         self.state = self.state + K @ y
-        
-        # Update covariance
         self.P = (np.eye(6) - K @ H) @ self.P
     
     def update_with_imu(self):
@@ -154,85 +139,100 @@ class SensorFusionNode:
         
         # Measurement model (observe angular velocity)
         H = np.zeros((1, 6))
-        H[0, 5] = 1  # omega
+        H[0, 5] = 1
         
-        # Get measurement
         omega_meas = self.imu_data.angular_velocity.z
         z = np.array([omega_meas])
-        
-        # Innovation
         y = z - H @ self.state
-        
-        # Innovation covariance
         S = H @ self.P @ H.T + np.array([[self.R_imu[2, 2] * self.weight_imu]])
-        
-        # Kalman gain
         K = self.P @ H.T @ np.linalg.inv(S)
-        
-        # Update state
         self.state = self.state + K @ y
-        
-        # Update covariance
         self.P = (np.eye(6) - K @ H) @ self.P
     
-    def ekf_update(self, event):
-        """Main EKF loop"""
-        current_time = rospy.Time.now()
-        dt = (current_time - self.last_update_time).to_sec()
+    def ekf_update(self):
+        """Main EKF update loop"""
+        current_time = self.get_clock().now()
+        dt = (current_time - self.last_update_time).nanoseconds / 1e9
         self.last_update_time = current_time
         
-        # Calculate dynamic weights
         self.calculate_dynamic_weights()
         
-        # Prediction
-        if dt > 0 and dt < 1.0:  # Sanity check
+        if 0 < dt < 1.0:
             self.predict(dt)
         
-        # Update with sensors
         self.update_with_odom()
         self.update_with_imu()
         
-        # Publish fused pose
         self.publish_fused_pose()
     
+    def quaternion_from_euler(self, roll, pitch, yaw):
+        """Simple euler to quaternion conversion"""
+        cy = math.cos(yaw * 0.5)
+        sy = math.sin(yaw * 0.5)
+        cp = math.cos(pitch * 0.5)
+        sp = math.sin(pitch * 0.5)
+        cr = math.cos(roll * 0.5)
+        sr = math.sin(roll * 0.5)
+        
+        q = [0] * 4
+        q[0] = sr * cp * cy - cr * sp * sy # x
+        q[1] = cr * sp * cy + sr * cp * sy # y
+        q[2] = cr * cp * sy - sr * sp * cy # z
+        q[3] = cr * cp * cy + sr * sp * sy # w
+        return q
+    
     def publish_fused_pose(self):
-        """Publish fused pose estimate"""
+        """Publish fused pose and broadcast TF"""
+        now = self.get_clock().now().to_msg()
+        
         msg = PoseWithCovarianceStamped()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = now
         msg.header.frame_id = "odom"
         
         msg.pose.pose.position.x = self.state[0]
         msg.pose.pose.position.y = self.state[1]
         msg.pose.pose.position.z = 0.0
         
-        # Convert theta to quaternion
-        quaternion = tf.transformations.quaternion_from_euler(0, 0, self.state[2])
-        msg.pose.pose.orientation.x = quaternion[0]
-        msg.pose.pose.orientation.y = quaternion[1]
-        msg.pose.pose.orientation.z = quaternion[2]
-        msg.pose.pose.orientation.w = quaternion[3]
+        q = self.quaternion_from_euler(0, 0, self.state[2])
+        msg.pose.pose.orientation.x = q[0]
+        msg.pose.pose.orientation.y = q[1]
+        msg.pose.pose.orientation.z = q[2]
+        msg.pose.pose.orientation.w = q[3]
         
-        # Copy covariance
-        covariance = np.zeros(36)
-        covariance[0] = self.P[0, 0]    # x
-        covariance[7] = self.P[1, 1]    # y
-        covariance[35] = self.P[2, 2]   # theta
-        msg.pose.covariance = covariance.tolist()
+        # Covariance
+        cov = np.zeros(36)
+        cov[0] = self.P[0, 0]
+        cov[7] = self.P[1, 1]
+        cov[35] = self.P[2, 2]
+        msg.pose.covariance = cov.tolist()
         
         self.fused_pose_pub.publish(msg)
         
-        # Broadcast TF
-        self.tf_broadcaster.sendTransform(
-            (self.state[0], self.state[1], 0),
-            quaternion,
-            rospy.Time.now(),
-            "base_link",
-            "odom"
-        )
+        # TF
+        t = TransformStamped()
+        t.header.stamp = now
+        t.header.frame_id = "odom"
+        t.child_frame_id = "base_link"
+        t.transform.translation.x = self.state[0]
+        t.transform.translation.y = self.state[1]
+        t.transform.translation.z = 0.0
+        t.transform.rotation.x = q[0]
+        t.transform.rotation.y = q[1]
+        t.transform.rotation.z = q[2]
+        t.transform.rotation.w = q[3]
+        
+        self.tf_broadcaster.sendTransform(t)
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = SensorFusionNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
-    try:
-        node = SensorFusionNode()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    main()

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>hybrid_navigation</name>
   <version>1.0.0</version>
   <description>Hybrid navigation stack with fuzzy logic and tether awareness for ATLAS-T</description>
@@ -7,20 +7,20 @@
   <maintainer email="chandan@bit.edu.cn">Chandan Sheikder</maintainer>
   <license>MIT</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_python</buildtool_depend>
   
-  <depend>rospy</depend>
-  <depend>roscpp</depend>
-  <depend>std_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>visualization_msgs</depend>
-  <depend>tf</depend>
-  <depend>tf2_ros</depend>
-  <depend>message_generation</depend>
-  <depend>message_runtime</depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>hybrid_navigation_msgs</exec_depend>
   
   <export>
+    <build_type>ament_python</build_type>
   </export>
 </package>

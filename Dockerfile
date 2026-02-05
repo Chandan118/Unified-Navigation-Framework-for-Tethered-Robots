@@ -1,40 +1,40 @@
-# Use official ROS Noetic image
-FROM osrf/ros:noetic-desktop-full
+# Start from official ROS 2 Humble base
+FROM ros:humble-ros-base
 
-# Set shell to bash
-SHELL ["/bin/bash", "-c"]
+# Set environment variables
+ENV ROS_DISTRO=humble
+ENV TERM=xterm-256color
 
-# Install additional dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    ros-noetic-gazebo-ros-pkgs \
-    ros-noetic-gazebo-ros-control \
-    ros-noetic-velodyne-simulator \
-    ros-noetic-hector-gazebo-plugins \
-    ros-noetic-joint-state-publisher \
-    ros-noetic-robot-state-publisher \
-    ros-noetic-xacro \
-    ros-noetic-tf \
     python3-pip \
-    python3-rosdep \
-    python3-catkin-tools \
-    python3-numpy \
-    python3-scipy \
-    python3-skimage \
-    python3-opencv \
+    python3-colcon-common-extensions \
+    ros-humble-cv-bridge \
+    ros-humble-tf2-ros \
+    ros-humble-nav-msgs \
+    ros-humble-sensor-msgs \
+    ros-humble-geometry-msgs \
+    ros-humble-std-msgs \
+    ros-humble-visualization-msgs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install remaining Python packages via pip
-RUN pip3 install --no-cache-dir \
+# Install Python dependencies
+RUN pip3 install \
     scikit-fuzzy \
-    noise
+    numpy \
+    opencv-python
 
 # Create workspace
-WORKDIR /catkin_ws
-RUN mkdir -p src
+WORKDIR /ros2_ws
+COPY ./src ./src
 
-# Entrypoint setup
-COPY ./ros_entrypoint.sh /
+# Build the workspace
+RUN . /opt/ros/humble/setup.sh && \
+    colcon build --symlink-install
+
+# Copy entrypoint script
+COPY ros_entrypoint.sh /ros_entrypoint.sh
 RUN chmod +x /ros_entrypoint.sh
-ENTRYPOINT ["/ros_entrypoint.sh"]
 
+ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
