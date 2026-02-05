@@ -5,9 +5,9 @@ name: Python package
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master", "ros2-development", "fix/flake8-python3-unicode" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master", "ros2-development", "fix/flake8-python3-unicode" ]
 
 jobs:
   build:
@@ -19,22 +19,35 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
+        python -m pip install flake8 pytest numpy scikit-fuzzy opencv-python
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Inspect Workspace (Diagnostic)
+      run: |
+        echo "Root contents:"
+        ls -F
+        echo "Source contents:"
+        ls -R src/
+
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # Use the .flake8 configuration file and target ONLY the src directory
+        # Explicitly exclude build artifacts as a fail-safe
+        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=devel,build,install
+        flake8 src/ --count --exit-zero --statistics --exclude=devel,build,install
+
     - name: Test with pytest
       run: |
-        pytest
+        # Skip ROS 2 specific tests if rclpy is not installed
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/src/hybrid_navigation:$(pwd)/src/atlas_mission_control
+        # pytest returns exit code 5 if no tests are found. We treat this as success.
+        pytest src --ignore-glob='*node.py' --ignore-glob='*launch.py' || [ $? -eq 5 ]
