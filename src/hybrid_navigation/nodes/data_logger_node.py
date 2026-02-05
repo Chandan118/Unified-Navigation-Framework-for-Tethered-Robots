@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
 """
-Data Logger Node for ATLAS-T Simulation
+Data Logger Node for ATLAS-T Simulation (ROS 2 version)
 Records simulation metrics to a CSV file for performance analysis
 """
 
-import rospy
+import rclpy
+from rclpy.node import Node
 import csv
 import os
 from datetime import datetime
 from nav_msgs.msg import Odometry
-from hybrid_navigation.msg import TetherStatus, SceneComplexity
+from hybrid_navigation_msgs.msg import TetherStatus, SceneComplexity
 from std_msgs.msg import String
 
-class DataLoggerNode:
+class DataLoggerNode(Node):
     def __init__(self):
-        rospy.init_node('data_logger_node', anonymous=False)
+        super().__init__('data_logger_node')
         
         # Parameters
-        self.log_dir = rospy.get_param('~log_dir', os.path.join(os.environ['HOME'], 'atlas_ws/results'))
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
+        self.declare_parameter('log_dir', os.path.join(os.environ['HOME'], 'atlas_ws/results'))
+        log_dir = self.get_parameter('log_dir').get_parameter_value().string_value
+        
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
             
-        self.filename = os.path.join(self.log_dir, f"sim_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+        self.filename = os.path.join(log_dir, f"sim_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
         
         # Data storage
         self.current_data = {
@@ -41,15 +44,16 @@ class DataLoggerNode:
         self.csv_writer.writeheader()
         
         # Subscribers
-        rospy.Subscriber('/odom', Odometry, self.odom_callback)
-        rospy.Subscriber('/tether_status', TetherStatus, self.tether_callback)
-        rospy.Subscriber('/scene_complexity', SceneComplexity, self.scene_callback)
-        rospy.Subscriber('/planner_state', String, self.state_callback)
+        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(TetherStatus, '/tether_status', self.tether_callback, 10)
+        self.create_subscription(SceneComplexity, '/scene_complexity', self.scene_callback, 10)
+        self.create_subscription(String, '/planner_state', self.state_callback, 10)
         
         # Timer for logging (5Hz)
-        rospy.Timer(rospy.Duration(0.2), self.log_data)
+        timer_period = 0.2
+        self.timer = self.create_timer(timer_period, self.log_data)
         
-        rospy.loginfo(f"Data Logger initialized. Saving to {self.filename}")
+        self.get_logger().info(f"Data Logger initialized. Saving to {self.filename}")
         
     def odom_callback(self, msg):
         self.current_data['pos_x'] = msg.pose.pose.position.x
@@ -66,21 +70,29 @@ class DataLoggerNode:
     def state_callback(self, msg):
         self.current_data['planner_state'] = msg.data
         
-    def log_data(self, event):
-        if rospy.is_shutdown():
-            return
-            
-        self.current_data['timestamp'] = rospy.get_time()
+    def log_data(self):
+        # Update timestamp with current system time in seconds
+        now = self.get_clock().now()
+        self.current_data['timestamp'] = now.nanoseconds / 1e9
+        
         self.csv_writer.writerow(self.current_data)
         self.csv_file.flush()
         
-    def __del__(self):
+    def destroy_node(self):
         if hasattr(self, 'csv_file'):
             self.csv_file.close()
+        super().destroy_node()
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = DataLoggerNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
-    try:
-        node = DataLoggerNode()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    main()

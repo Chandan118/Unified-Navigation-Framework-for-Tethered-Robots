@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
 """
-Tether Tension and Snag Detection Node
+Tether Tension and Snag Detection Node (ROS 2 version)
 Calculates virtual tether tension and detects snags based on geometry
 """
 
-import rospy
-import tf
+import rclpy
+from rclpy.node import Node
 import numpy as np
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry, OccupancyGrid
-from hybrid_navigation.msg import TetherStatus
+from hybrid_navigation_msgs.msg import TetherStatus
 from visualization_msgs.msg import Marker
 import math
 
-class TetherTensionNode:
+class TetherTensionNode(Node):
     def __init__(self):
-        rospy.init_node('tether_tension_node', anonymous=False)
+        super().__init__('tether_tension_node')
         
         # Parameters
-        self.max_tether_length = rospy.get_param('~max_tether_length', 30.0)  # meters
-        self.base_station_pos = Point(0, 0, 0)
-        self.robot_pos = Point(0, 0, 0)
-        self.tension_coefficient = rospy.get_param('~tension_coefficient', 1.5)  # N/m
+        self.declare_parameter('max_tether_length', 30.0)
+        self.declare_parameter('tension_coefficient', 1.5)
+        
+        self.max_tether_length = self.get_parameter('max_tether_length').get_parameter_value().double_value
+        self.tension_coefficient = self.get_parameter('tension_coefficient').get_parameter_value().double_value
+        
+        self.base_station_pos = Point(x=0.0, y=0.0, z=0.0)
+        self.robot_pos = Point(x=0.0, y=0.0, z=0.0)
         
         # Path breadcrumbs for snag detection
         self.breadcrumbs = []
@@ -31,21 +35,19 @@ class TetherTensionNode:
         self.costmap = None
         self.costmap_info = None
         
-        # TF listener
-        self.tf_listener = tf.TransformListener()
-        
         # Publishers
-        self.tether_status_pub = rospy.Publisher('/tether_status', TetherStatus, queue_size=1)
-        self.tether_viz_pub = rospy.Publisher('/tether_visualization', Marker, queue_size=1)
+        self.tether_status_pub = self.create_publisher(TetherStatus, '/tether_status', 10)
+        self.tether_viz_pub = self.create_publisher(Marker, '/tether_visualization', 10)
         
         # Subscribers
-        rospy.Subscriber('/odom', Odometry, self.odom_callback)
-        rospy.Subscriber('/move_base/local_costmap/costmap', OccupancyGrid, self.costmap_callback)
+        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(OccupancyGrid, '/move_base/local_costmap/costmap', self.costmap_callback, 10)
         
-        # Timer for publishing
-        self.timer = rospy.Timer(rospy.Duration(0.1), self.publish_tether_status)
+        # Timer for publishing (10 Hz)
+        timer_period = 0.1
+        self.timer = self.create_timer(timer_period, self.publish_tether_status)
         
-        rospy.loginfo("Tether Tension Node initialized")
+        self.get_logger().info("Tether Tension Node initialized (ROS 2)")
     
     def odom_callback(self, msg):
         """Update robot position from odometry"""
@@ -55,7 +57,7 @@ class TetherTensionNode:
         
         # Add breadcrumb if robot has moved enough
         if self.should_add_breadcrumb():
-            self.breadcrumbs.append(Point(self.robot_pos.x, self.robot_pos.y, 0))
+            self.breadcrumbs.append(Point(x=self.robot_pos.x, y=self.robot_pos.y, z=0.0))
             
             # Limit breadcrumb list size
             if len(self.breadcrumbs) > 100:
@@ -89,9 +91,6 @@ class TetherTensionNode:
     
     def calculate_tension(self, length):
         """Calculate virtual tension based on tether length"""
-        # Simple linear model: tension increases with length
-        # More sophisticated models could include elasticity, drag, etc.
-        
         if length < self.max_tether_length * 0.7:
             # Low tension zone
             tension = length * 0.5
@@ -110,18 +109,17 @@ class TetherTensionNode:
         if self.costmap is None or len(self.breadcrumbs) < 2:
             return False
         
-        # Check line segments between breadcrumbs and base station
+        # Check line segments between breadcrumbs
         for i in range(len(self.breadcrumbs) - 1):
             p1 = self.breadcrumbs[i]
             p2 = self.breadcrumbs[i + 1]
-            
             if self.line_intersects_obstacle(p1, p2):
                 return True
         
         # Check from last breadcrumb to base station
         if self.breadcrumbs:
-            if self.line_intersects_obstacle(self.breadcrumbs[-1], 
- Point(self.base_station_pos.x, self.base_station_pos.y, 0)):
+            base_p = Point(x=self.base_station_pos.x, y=self.base_station_pos.y, z=0.0)
+            if self.line_intersects_obstacle(self.breadcrumbs[-1], base_p):
                 return True
         
         return False
@@ -144,13 +142,14 @@ class TetherTensionNode:
             
             # Check bounds
             if 0 <= map_x < self.costmap_info.width and 0 <= map_y < self.costmap_info.height:
-                # Check if occupied (value > 50 is typically considered occupied)
+                # OccupancyGrid values are [0, 100], -1 is unknown. 
+                # > 50 is typically obstacle.
                 if self.costmap[map_y, map_x] > 50:
                     return True
         
         return False
     
-    def publish_tether_status(self, event):
+    def publish_tether_status(self):
         """Publish tether status message"""
         # Calculate values
         length = self.calculate_tether_length()
@@ -159,7 +158,7 @@ class TetherTensionNode:
         
         # Create message
         msg = TetherStatus()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "odom"
         msg.length = length
         msg.tension = tension
@@ -170,57 +169,50 @@ class TetherTensionNode:
         
         self.tether_status_pub.publish(msg)
         
-        # Publish visualization
+        # Visualize
         self.publish_visualization(length, tension, snag_detected)
     
     def publish_visualization(self, length, tension, snag_detected):
         """Publish tether visualization marker"""
         marker = Marker()
         marker.header.frame_id = "odom"
-        marker.header.stamp = rospy.Time.now()
+        marker.header.stamp = self.get_clock().now().to_msg()
         marker.ns = "tether"
         marker.id = 0
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.ADD
         
-        # Add points (breadcrumbs + current position)
+        # Add points
         marker.points.append(self.base_station_pos)
         for crumb in self.breadcrumbs:
             marker.points.append(crumb)
         marker.points.append(self.robot_pos)
         
-        # Color based on tension/snag status
+        # Color
         if snag_detected:
-            # Red if snagged
-            marker.color.r = 1.0
-            marker.color.g = 0.0
-            marker.color.b = 0.0
-        elif tension > 30:
-            # Orange if high tension
-            marker.color.r = 1.0
-            marker.color.g = 0.5
-            marker.color.b = 0.0
-        elif tension > 15:
-            # Yellow if medium tension
-            marker.color.r = 1.0
-            marker.color.g = 1.0
-            marker.color.b = 0.0
+            marker.color.r = 1.0; marker.color.g = 0.0; marker.color.b = 0.0
+        elif tension > 30.0:
+            marker.color.r = 1.0; marker.color.g = 0.5; marker.color.b = 0.0
+        elif tension > 15.0:
+            marker.color.r = 1.0; marker.color.g = 1.0; marker.color.b = 0.0
         else:
-            # Green if low tension
-            marker.color.r = 0.0
-            marker.color.g = 1.0
-            marker.color.b = 0.0
+            marker.color.r = 0.0; marker.color.g = 1.0; marker.color.b = 0.0
         
         marker.color.a = 0.8
-        marker.scale.x = 0.02  # Line width
-        
-        marker.lifetime = rospy.Duration(0.2)
+        marker.scale.x = 0.02
         
         self.tether_viz_pub.publish(marker)
 
-if __name__ == '__main__':
+def main(args=None):
+    rclpy.init(args=args)
+    node = TetherTensionNode()
     try:
-        node = TetherTensionNode()
-        rospy.spin()
-    except rospy.ROSInterruptException:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
         pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
