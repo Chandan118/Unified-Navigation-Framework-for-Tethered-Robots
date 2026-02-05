@@ -5,7 +5,7 @@ project(atlas_gazebo)
 find_package(ament_cmake REQUIRED)
 
 # Install directories
-install(DIRECTORY launch models worlds scripts
+install(DIRECTORY launch worlds scripts
   DESTINATION share/${PROJECT_NAME}
 )
 
