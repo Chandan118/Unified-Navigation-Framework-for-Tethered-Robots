@@ -18,7 +18,7 @@ jobs:
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip build-essential git wget python3-catkin-pkg python3-empy python3-nose python3-vcstool
+          sudo apt-get install -y python3-pip build-essential git wget python3-catkin-pkg python3-empy python3-nose python3-vcstool python3-colcon-common-extensions
           # sudo might not be in the container, but action-ros-ci might need it or we assume root.
           # ros:noetic images usually run as root.
 
