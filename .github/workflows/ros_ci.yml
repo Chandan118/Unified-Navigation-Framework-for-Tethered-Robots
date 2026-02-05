@@ -25,10 +25,10 @@ jobs:
       - name: Install Python dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install scikit-fuzzy numpy opencv-python
+          python3 -m pip install scikit-fuzzy numpy opencv-python colcon-lcov-result colcon-coveragepy-result
 
       - name: Build and Test
-        uses: ros-tooling/action-ros-ci@v0.2
+        uses: ros-tooling/action-ros-ci@v0.3
         with:
           target-ros1-distro: noetic
           vcs-repo-file-url: ""
