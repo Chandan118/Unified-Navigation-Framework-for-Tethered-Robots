@@ -1,0 +1,53 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python package
+
+on:
+  push:
+    branches: [ "ros1-noetic" ]
+  pull_request:
+    branches: [ "ros1-noetic" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest numpy scikit-fuzzy opencv-python
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Inspect Workspace (Diagnostic)
+      run: |
+        echo "Root contents:"
+        ls -F
+        echo "Source contents:"
+        ls -R src/
+
+    - name: Lint with flake8
+      run: |
+        # Use the .flake8 configuration file and target ONLY the src directory
+        # Explicitly exclude build artifacts as a fail-safe
+        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=devel,build,install
+        flake8 src/ --count --exit-zero --statistics --exclude=devel,build,install
+
+    - name: Test with pytest
+      run: |
+        # Skip ROS specific tests
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/src/hybrid_navigation/nodes:$(pwd)/src/atlas_mission_control/nodes
+        # pytest returns exit code 5 if no tests are found. We treat this as success.
+        pytest src --ignore-glob='*node.py' --ignore-glob='*launch.py' || [ $? -eq 5 ]
