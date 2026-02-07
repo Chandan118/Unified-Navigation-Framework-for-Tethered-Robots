@@ -15,7 +15,9 @@ This will:
 2.  Launch Gazebo with the warehouse world.
 3.  Spawn the ATLAS robot.
 4.  Start the navigation stack (planner, fuzzy controller, sensor fusion).
+    *   *Note: Fuzzy controller includes a safety fallback to slow creep if rules are undefined but path is clear.*
 5.  Open Rviz for visualization.
+    *   *Note: Tether visualization now supports smoothed tension transitions.*
 
 ## 🧪 Running Individual Components
 

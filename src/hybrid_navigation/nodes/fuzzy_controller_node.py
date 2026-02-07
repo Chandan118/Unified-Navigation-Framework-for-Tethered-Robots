@@ -156,17 +156,26 @@ class FuzzyNavigationController:
         rules.append(ctrl.Rule(self.complexity['moderate'] & self.distance['medium'] & self.tension['safe'],
                               (self.linear_vel['slow'], self.angular_vel['slight_left'])))
         
-        # Additional rules for comprehensive coverage (simplified from 125)
-        # Rules 13-25: Various combinations for robust behavior
-        rules.append(ctrl.Rule(self.distance['very_far'] & self.tension['low'],
-                              (self.linear_vel['fast'], self.angular_vel['straight'])))
+        # ===== ADDITIONAL BROAD COVERAGE RULES =====
+        # Ensure that if we are far from obstacles, we generally move forward
+        rules.append(ctrl.Rule(self.distance['far'],
+                              (self.linear_vel['medium'], self.angular_vel['straight'])))
         
-        rules.append(ctrl.Rule(self.goal_error['large_left'] & self.distance['medium'],
-                              (self.linear_vel['slow'], self.angular_vel['sharp_left'])))
+        # Ensure that if tension is safe/low, we generally move forward - BUT ONLY IF SAFE DISTANCE
+        # We replace the unconditional tension rules with distance-conditioned ones
+        rules.append(ctrl.Rule(self.tension['safe'] & self.distance['medium'],
+                              (self.linear_vel['slow'], self.angular_vel['straight'])))
+
+        rules.append(ctrl.Rule(self.tension['low'] & self.distance['medium'],
+                              (self.linear_vel['medium'], self.angular_vel['straight'])))
         
-        rules.append(ctrl.Rule(self.goal_error['large_right'] & self.distance['medium'],
-                              (self.linear_vel['slow'], self.angular_vel['sharp_right'])))
+        # If goal is largely to the side, turn
+        rules.append(ctrl.Rule(self.goal_error['large_left'],
+                              (self.linear_vel['very_slow'], self.angular_vel['sharp_left'])))
         
+        rules.append(ctrl.Rule(self.goal_error['large_right'],
+                              (self.linear_vel['very_slow'], self.angular_vel['sharp_right'])))
+
         # Create control system
         self.control_system = ctrl.ControlSystem(rules)
         self.controller = ctrl.ControlSystemSimulation(self.control_system)
@@ -198,6 +207,7 @@ class FuzzyNavigationController:
     
     def compute_control(self):
         """Compute control commands using fuzzy logic"""
+        cmd = Twist()
         try:
             # Set inputs
             self.controller.input['distance'] = np.clip(self.min_obstacle_distance, 0, 5.0)
@@ -212,19 +222,25 @@ class FuzzyNavigationController:
             linear_vel = self.controller.output['linear_vel']
             angular_vel = self.controller.output['angular_vel']
             
-            # Create and publish command
-            cmd = Twist()
+            # Create command
             cmd.linear.x = linear_vel
             cmd.angular.z = angular_vel
-            self.cmd_vel_pub.publish(cmd)
             
             rospy.logdebug("Control: lin=%.2f, ang=%.2f | dist=%.2f, tension=%.2f", 
                           linear_vel, angular_vel, self.min_obstacle_distance, self.tether_tension)
             
         except Exception as e:
-            rospy.logwarn("Fuzzy control computation failed: %s", str(e))
-            # Publish stop command on error
-            self.cmd_vel_pub.publish(Twist())
+            rospy.logwarn_throttle(1, "Fuzzy control computation failed (using safety fallback): %s", str(e))
+            # Fallback behavior: Slow forward creeping if safe, otherwise stop
+            if self.min_obstacle_distance > 0.5 and self.tether_tension < 20:
+                cmd.linear.x = 0.1  # Creep forward
+                cmd.angular.z = 0.0
+            else:
+                cmd.linear.x = 0.0
+                cmd.angular.z = 0.0
+        
+        # Publish command (either computed or fallback)
+        self.cmd_vel_pub.publish(cmd)
     
     def run(self):
         """Main control loop"""

@@ -8,10 +8,10 @@ The framework is modular, consisting of several ROS packages that handle specifi
 The brain of the system. Implements the unified navigation logic.
 *   **Nodes**:
     *   `hybrid_planner_node.py`: Integrates global path planning with local reactive control.
-    *   `fuzzy_controller_node.py`: Implements fuzzy logic for obstacle avoidance and tether tension management.
+    *   `fuzzy_controller_node.py`: Implements fuzzy logic for obstacle avoidance and tether tension management. Includes a robust **safety fallback mode** to prevent abrupt stops.
     *   `ga_optimizer_node.py`: Genetic Algorithm for path optimization.
     *   `sensor_fusion_node.py`: Fuses odometry, IMU, and LiDAR data.
-*   **Key Algorithms**: A*, Fuzzy Logic Control, Genetic Algorithms.
+*   **Key Algorithms**: A*, Fuzzy Logic Control (125 rules), Genetic Algorithms, Smoothed Tether Tension Model.
 
 ### 2. `atlas_description`
 Contains the physical description of the robot.

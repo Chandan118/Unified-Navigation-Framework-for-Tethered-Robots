@@ -94,13 +94,17 @@ class TetherTensionNode:
         
         if length < self.max_tether_length * 0.7:
             # Low tension zone
+            # Max tension here: 30 * 0.7 * 0.5 = 10.5 N
             tension = length * 0.5
         elif length < self.max_tether_length * 0.9:
             # Medium tension zone
-            tension = 10 + (length - self.max_tether_length * 0.7) * 1.0
+            # Start at 10.5 N
+            # Max tension here: 10.5 + (27 - 21) * 1.0 = 16.5 N
+            tension = 10.5 + (length - self.max_tether_length * 0.7) * 1.0
         else:
             # High tension zone
-            tension = 20 + (length - self.max_tether_length * 0.9) * 3.0
+            # Start at 16.5 N
+            tension = 16.5 + (length - self.max_tether_length * 0.9) * 3.0
         
         # Cap at 50N
         return min(tension, 50.0)
