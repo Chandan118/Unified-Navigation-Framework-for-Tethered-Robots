@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>atlas_mission_control</name>
+  <version>0.1.0</version>
+  <description>The atlas_mission_control package provides high-level mission management for tethered robots.</description>
+  <maintainer email="chandan@bit.edu.cn">Chandan Sheikder</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>hybrid_navigation</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

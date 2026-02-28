@@ -1,0 +1,29 @@
+<launch>
+  <!-- Robot Description -->
+  <arg name="model" default="$(find atlas_description)/urdf/atlas_t.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'"/>
+
+  <!-- Robot State Publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  
+  <!-- Joint State Publisher -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+  </node>
+
+  <!-- Gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find atlas_gazebo)/worlds/warehouse_world.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="verbose" value="true"/>
+  </include>
+
+  <!-- Spawn Robot in Gazebo -->
+  <node name="spawn_atlas_t" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -param robot_description -model atlas_t -x 0 -y 0 -z 0.5"
+        output="screen"/>
+
+</launch>

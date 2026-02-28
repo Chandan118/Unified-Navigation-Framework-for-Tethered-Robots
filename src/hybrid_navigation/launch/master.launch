@@ -1,0 +1,31 @@
+<launch>
+  <!-- MASTER LAUNCH FILE FOR COMPLETE ATLAS-T SIMULATION -->
+  
+  <!-- Use simulation time -->
+  <param name="use_sim_time" value="true"/>
+  
+  <!-- 1. Generate World (if regeneration desired) -->
+  <!-- Uncomment to regenerate world before launching -->
+  <!-- <node name="world_generator" pkg="atlas_gazebo" type="world_generator.py" args="$(find atlas_gazebo)/worlds/warehouse_world.world"/> -->
+  
+  <!-- 2. Spawn Robot in Gazebo -->
+  <include file="$(find atlas_gazebo)/launch/spawn_robot.launch"/>
+  
+  <!-- Wait for Gazebo to initialize -->
+  <arg name="wait_for_gazebo" default="5"/>
+  
+  <!-- 3. Start Hybrid Navigation Stack  -->
+  <include file="$(find hybrid_navigation)/launch/hybrid_navigation.launch"/>
+  
+  <!-- 4. Additional Tools -->
+  <!-- RQT Plot for real-time metrics -->
+  <node name="rqt_plot_metrics" pkg="rqt_plot" type="rqt_plot" 
+        args="/tether_status/length /tether_status/tension /scene_complexity/complexity_score"
+        required="false"/>
+  
+  <!-- Data Logger for post-simulation analysis -->
+  <node name="data_logger" pkg="hybrid_navigation" type="data_logger_node.py" output="screen">
+    <param name="log_dir" value="$(find hybrid_navigation)/../../results"/>
+  </node>
+  
+</launch>

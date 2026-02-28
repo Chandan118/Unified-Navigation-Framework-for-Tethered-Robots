@@ -1,0 +1,480 @@
+<launch>
+  <!-- Hybrid Navigation Swarm Launch File -->
+
+  <arg name="use_sim_time" default="true"/>
+  <arg name="rviz" default="true"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+  <!-- Per-robot navigation stacks -->
+
+  <!-- Robot 1 navigation -->
+  <group ns="robot_1">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robots 2-10: reuse same pattern with different namespaces -->
+  <group ns="robot_2">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 3 navigation -->
+  <group ns="robot_3">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 4 navigation -->
+  <group ns="robot_4">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 5 navigation -->
+  <group ns="robot_5">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 6 navigation -->
+  <group ns="robot_6">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 7 navigation -->
+  <group ns="robot_7">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 8 navigation -->
+  <group ns="robot_8">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 9 navigation -->
+  <group ns="robot_9">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Robot 10 navigation -->
+  <group ns="robot_10">
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen">
+      <remap from="/odom" to="odom"/>
+      <remap from="/imu/data" to="imu/data"/>
+      <remap from="/fused_pose" to="fused_pose"/>
+    </node>
+    <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen">
+      <remap from="/camera/color/image_raw" to="camera/color/image_raw"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+    </node>
+    <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+      <param name="max_tether_length" value="30.0"/>
+      <param name="tension_coefficient" value="1.5"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/tether_visualization" to="tether_visualization"/>
+      <remap from="/move_base/local_costmap/costmap" to="move_base/local_costmap/costmap"/>
+    </node>
+    <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+      <param name="obstacle_threshold" value="1.5"/>
+      <param name="goal_tolerance" value="0.5"/>
+      <param name="wall_follow_distance" value="0.7"/>
+      <param name="max_tether_usage" value="0.95"/>
+      <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
+      <remap from="/odom" to="odom"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/planner_state" to="planner_state"/>
+    </node>
+    <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+      <param name="linear_speed" value="0.5"/>
+      <param name="max_angular_speed" value="1.0"/>
+      <param name="safety_distance" value="1.0"/>
+      <remap from="/scan" to="scan"/>
+      <remap from="/tether_status" to="tether_status"/>
+      <remap from="/scene_complexity" to="scene_complexity"/>
+      <remap from="/goal_angle" to="goal_angle"/>
+      <remap from="/cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- Swarm coordinator and logger at global level -->
+  <node name="swarm_coordinator" pkg="hybrid_navigation" type="swarm_coordinator_node.py" output="screen">
+    <param name="robot_count" value="10"/>
+    <param name="robot_prefix" value="robot_"/>
+  </node>
+
+  <node name="swarm_data_logger" pkg="hybrid_navigation" type="swarm_data_logger_node.py" output="screen">
+    <param name="log_dir" value="$(find hybrid_navigation)/../../results"/>
+    <param name="robot_count" value="10"/>
+    <param name="robot_prefix" value="robot_"/>
+  </node>
+
+  <!-- Optional RViz for visualization (e.g., focus on robot_1 topics) -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_navigation)/rviz/navigation.rviz" required="false" if="$(arg rviz)"/>
+
+</launch>

@@ -1,0 +1,117 @@
+==========================================
+ATLAS-T SWARM SIMULATION PERFORMANCE REPORT
+==========================================
+Timestamp: 2026-01-25 10:27:00
+Source Data: sim_data_20260125_022541.csv
+
+PER-ROBOT METRICS:
+- Robot robot_1:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 5.27 meters
+  * Average Speed: 0.58 m/s
+  * Average Tether Tension: 0.70 N
+  * Maximum Tether Tension: 1.06 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - MOTION_TO_GOAL: 100.0%
+
+- Robot robot_10:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 4.31 meters
+  * Average Speed: 0.47 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_2:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 7.03 meters
+  * Average Speed: 0.77 m/s
+  * Average Tether Tension: 0.86 N
+  * Maximum Tether Tension: 1.67 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - MOTION_TO_GOAL: 100.0%
+
+- Robot robot_3:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 5.57 meters
+  * Average Speed: 0.61 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_4:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 5.55 meters
+  * Average Speed: 0.61 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_5:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 6.38 meters
+  * Average Speed: 0.70 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_6:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 6.41 meters
+  * Average Speed: 0.70 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_7:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 5.63 meters
+  * Average Speed: 0.62 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_8:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 6.43 meters
+  * Average Speed: 0.70 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+- Robot robot_9:
+  * Total Simulation Time: 9.13 seconds
+  * Total Distance Traveled: 6.39 meters
+  * Average Speed: 0.70 m/s
+  * Average Tether Tension: 0.00 N
+  * Maximum Tether Tension: 0.00 N
+  * Average Scene Complexity: 0.00
+  * Navigation States (% of time):
+    - Unknown: 100.0%
+
+SWARM-LEVEL METRICS:
+- Total Path Length (all robots): 58.96 meters
+- Mean Path Length per Robot: 5.90 meters
+- Path Length Std Dev: 0.74 meters
+- Swarm Average Tether Tension: 0.16 N
+- Swarm Maximum Tether Tension: 1.67 N
+- Swarm Average Scene Complexity: 0.00
+
+==========================================
+ANALYSIS COMPLETE

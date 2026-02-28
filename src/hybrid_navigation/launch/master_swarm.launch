@@ -1,0 +1,12 @@
+<launch>
+  <!-- Master launch for multi-robot ATLAS-T swarm simulation -->
+
+  <param name="use_sim_time" value="true"/>
+
+  <!-- 1. Spawn swarm of robots in Gazebo -->
+  <include file="$(find atlas_gazebo)/launch/spawn_swarm.launch"/>
+
+  <!-- 2. Start swarm hybrid navigation stack -->
+  <include file="$(find hybrid_navigation)/launch/hybrid_navigation_swarm.launch"/>
+
+</launch>

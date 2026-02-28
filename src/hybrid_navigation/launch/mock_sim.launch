@@ -1,0 +1,18 @@
+<launch>
+  <!-- Mock Simulation for when Gazebo is unavailable -->
+  <param name="use_sim_time" value="false"/>
+  
+  <!-- 1. Mock Data Generator -->
+  <node name="mock_data_generator" pkg="hybrid_navigation" type="mock_data_generator.py" output="screen"/>
+  
+  <!-- 2. Start Hybrid Navigation Stack -->
+  <include file="$(find hybrid_navigation)/launch/hybrid_navigation.launch">
+    <arg name="rviz" value="false"/>
+    <arg name="use_sim_time" value="false"/>
+  </include>
+  
+  <!-- 3. Data Logger -->
+  <node name="data_logger" pkg="hybrid_navigation" type="data_logger_node.py" output="screen">
+    <param name="log_dir" value="$(find hybrid_navigation)/../../results"/>
+  </node>
+</launch>

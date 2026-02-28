@@ -1,0 +1,8 @@
+prefix=/catkin_ws/devel
+
+Name: atlas_gazebo
+Description: Description of atlas_gazebo
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: gazebo_ros

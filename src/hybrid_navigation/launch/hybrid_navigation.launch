@@ -1,0 +1,47 @@
+<launch>
+  <!-- Hybrid Navigation System Launch File -->
+  
+  <!-- Parameters -->
+  <arg name="use_sim_time" default="true"/>
+  <arg name="rviz" default="true"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+  
+  <!-- Sensor Fusion Node -->
+  <node name="sensor_fusion_node" pkg="hybrid_navigation" type="sensor_fusion_node.py" output="screen"/>
+  
+  <!-- Scene Recognition Node -->
+  <node name="scene_recognition_node" pkg="hybrid_navigation" type="scene_recognition_node.py" output="screen"/>
+  
+  <!-- Tether Tension Node -->
+  <node name="tether_tension_node" pkg="hybrid_navigation" type="tether_tension_node.py" output="screen">
+    <param name="max_tether_length" value="30.0"/>
+    <param name="tension_coefficient" value="1.5"/>
+  </node>
+  
+  <!-- Hybrid Planner Node -->
+  <node name="hybrid_planner_node" pkg="hybrid_navigation" type="hybrid_planner_node.py" output="screen">
+    <param name="obstacle_threshold" value="1.5"/>
+    <param name="goal_tolerance" value="0.5"/>
+    <param name="wall_follow_distance" value="0.7"/>
+    <param name="max_tether_usage" value="0.95"/>
+  </node>
+  
+  <!-- Fuzzy Logic Controller -->
+  <node name="fuzzy_controller_node" pkg="hybrid_navigation" type="fuzzy_controller_node.py" output="screen">
+    <param name="linear_speed" value="0.5"/>
+    <param name="max_angular_speed" value="1.0"/>
+    <param name="safety_distance" value="1.0"/>
+  </node>
+  
+  <!-- Genetic Algorithm Optimizer (optional - comment out for simpler testing) -->
+  <node name="ga_optimizer_node" pkg="hybrid_navigation" type="ga_optimizer_node.py" output="screen">
+    <param name="population_size" value="10"/>
+    <param name="mutation_rate" value="0.1"/>
+    <param name="crossover_rate" value="0.7"/>
+    <param name="optimization_interval" value="120"/>  <!-- Run every 2 minutes -->
+  </node>
+  
+  <!-- RViz Visualization -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_navigation)/rviz/navigation.rviz" required="false" if="$(arg rviz)"/>
+  
+</launch>
