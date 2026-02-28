@@ -1,6 +1,8 @@
 # Unified Navigation Framework for Tethered Robots
 ## ROS 1 Noetic Implementation (Single & Swarm)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18522121.svg)](https://doi.org/10.5281/zenodo.18522121)
+
 This project implements a comprehensive simulation of the Adaptive Hybrid Navigation Framework for Tethered Robots, extended for **Swarm Robotics** (up to 10 robots) for high-level coordination and performance analysis.
 
 ## Features
@@ -261,7 +263,7 @@ The analysis framework now includes metrics derived from publication standards:
 If you use this code, please cite the following paper:
 
 ```text
-Chandan Sheikder, Unified Navigation Framework for Tethered Robots, [Year].
+Chandan Sheikder, Unified Navigation Framework for Tethered Robots, 2026. DOI: 10.5281/zenodo.18522121
 ```
 
 ## License
