@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "Unified Navigation Framework for Tethered Robots"
+version: "1.0.0"
+date-released: "2025-03-23"
+doi: "10.5281/zenodo.18522121"
+abstract: >-
+  A unified ROS navigation framework for tethered inspection robots featuring hybrid FSM planning, fuzzy velocity control, EKF sensor fusion, CNN scene recognition, and GA-based online parameter optimization.
+license: MIT
+authors:
+  - family-names: Sheikder
+    given-names: Chandan
+    email: chandan@bit.edu.cn
+    affiliation: "Beijing Institute of Technology (BIT)"
+    orcid: "https://orcid.org/0000-0003-1459-8747"
+repository-code: "https://github.com/Chandan118/Unified-Navigation-Framework-for-Tethered-Robots"
+keywords:
+  - "tethered robot"
+  - "hybrid navigation"
+  - "fuzzy control"
+  - "sensor fusion"
+  - "genetic algorithm"
+  - "ROS Noetic"
+contact:
+  - name: Chandan Sheikder
+    email: chandan@bit.edu.cn
+    website: "https://chandan118.github.io"
