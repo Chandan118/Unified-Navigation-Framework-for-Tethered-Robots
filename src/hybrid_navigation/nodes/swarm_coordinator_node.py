@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Swarm Coordinator Node (ROS 2 version)
-Assigns tasks to multiple ATLAS-T robots and performs basic spacing checks.
+swarm_coordinator_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Swarm Coordinator Node (ROS 2 version)
 """
 
 import math

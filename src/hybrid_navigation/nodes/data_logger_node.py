@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Data Logger Node for ATLAS-T Simulation (ROS 2 version)
-Records simulation metrics to a CSV file for performance analysis
+data_logger_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Data Logger Node for ATLAS-T Simulation (ROS 2 version)
 """
 
 import rclpy

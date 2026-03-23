@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Swarm Data Logger Node for ATLAS-T Simulation (ROS 2 version)
-Records per-robot metrics to a CSV file for swarm performance analysis.
+swarm_data_logger_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Swarm Data Logger Node for ATLAS-T Simulation (ROS 2 version)
 """
 
 import csv

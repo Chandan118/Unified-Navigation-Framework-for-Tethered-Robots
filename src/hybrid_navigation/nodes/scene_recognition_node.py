@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Scene Recognition Node using CNN (ROS 2 version)
-Classifies scenes as Simple, Moderate, or Complex
+scene_recognition_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Scene Recognition Node using CNN (ROS 2 version)
 """
 
 import rclpy

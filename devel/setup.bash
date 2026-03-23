@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# File        : setup.bash
+# Author      : Chandan Sheikder
+# Email       : chandan@bit.edu.cn
+# Phone       : +8618222390506
+# Affiliation : Beijing Institute of Technology (BIT)
+# Date        : 2026-03-23
+#
 # generated from catkin/cmake/templates/setup.bash.in
 
 CATKIN_SHELL=bash

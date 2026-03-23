@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Hybrid Planner Node - Finite State Machine for Navigation (ROS 2 version)
-Implements Motion-to-Goal, Enhanced Bug, and Tether Recovery states
+hybrid_planner_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Hybrid Planner Node - Finite State Machine for Navigation (ROS 2 version)
 """
 
 import rclpy

@@ -1,4 +1,11 @@
 #!/bin/bash
+# File        : run_full_sim.sh
+# Author      : Chandan Sheikder
+# Email       : chandan@bit.edu.cn
+# Phone       : +8618222390506
+# Affiliation : Beijing Institute of Technology (BIT)
+# Date        : 2026-03-23
+#
 # Complete Simulation Runner for ATLAS-T
 
 # Colors
