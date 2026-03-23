@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Sensor Fusion Node with Extended Kalman Filter (ROS 2 version)
-Implements dynamic weight adjustment based on sensor variance (Eq. 8-9 from paper)
+sensor_fusion_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Sensor Fusion Node with Extended Kalman Filter (ROS 2 version)
 """
 
 import rclpy

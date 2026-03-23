@@ -1,5 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""
+tether_tension_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Module for Tether Tension Node
+"""
+
 # generated from catkin/cmake/template/script.py.in
 # creates a relay to a python script source file, acting as that file.
 # The purpose is that of a symlink

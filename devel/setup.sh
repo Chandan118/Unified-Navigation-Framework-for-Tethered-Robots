@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
+# File        : setup.sh
+# Author      : Chandan Sheikder
+# Email       : chandan@bit.edu.cn
+# Phone       : +8618222390506
+# Affiliation : Beijing Institute of Technology (BIT)
+# Date        : 2026-03-23
+#
 # generated from catkin/cmake/template/setup.sh.in
 
 # Sets various environment variables and sources additional environment hooks.

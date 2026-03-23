@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Genetic Algorithm Optimizer for Parameter Tuning (ROS 2 version)
-Optimizes fuzzy controller parameters based on fitness function (Eq. 17 from paper)
+ga_optimizer_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Genetic Algorithm Optimizer for Parameter Tuning (ROS 2 version)
 """
 
 import rclpy

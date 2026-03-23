@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """
-Fuzzy Logic Controller Node for Hybrid Navigation
-Implements the Fuzzy Logic Controller described in Section 5.2 of the paper
-with 125 rules for navigation control (ROS 2 version)
+fuzzy_controller_node.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Fuzzy Logic Controller Node for Hybrid Navigation
 """
 
 import rclpy

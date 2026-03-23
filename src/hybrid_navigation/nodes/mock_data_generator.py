@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Mock Data Generator for ATLAS-T Simulation (ROS 2 version)
-Publishes fake sensor data to allow simulation logic to run without Gazebo
+mock_data_generator.py
+
+Author      : Chandan Sheikder
+Email       : chandan@bit.edu.cn
+Phone       : +8618222390506
+Affiliation : Beijing Institute of Technology (BIT)
+Date        : 2026-03-23
+
+Description:
+    Mock Data Generator for ATLAS-T Simulation (ROS 2 version)
 """
 
 import rclpy
