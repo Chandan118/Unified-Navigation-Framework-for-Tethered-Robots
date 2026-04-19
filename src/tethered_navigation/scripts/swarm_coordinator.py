@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
 
 # ROS 2 Messages
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Float32MultiArray
 from geometry_msgs.msg import PoseStamped, Point, Twist
 from tethered_navigation.msg import TetherState, YieldingDecision, SwarmMetrics
 

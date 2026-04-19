@@ -19,7 +19,7 @@ from typing import List, Tuple
 from collections import deque
 
 # ROS 2 Messages
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Float32MultiArray
 from geometry_msgs.msg import PoseStamped, Point, Twist
 from nav_msgs.msg import Odometry
 from tethered_navigation.msg import TetherState
