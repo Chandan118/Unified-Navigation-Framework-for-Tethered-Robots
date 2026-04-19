@@ -38,7 +38,7 @@ jobs:
         uses: ros-tooling/action-ros-ci@v0.3
         with:
           target-ros2-distro: humble
-          package-selection-args: --packages-select hybrid_navigation_msgs hybrid_navigation
+          package-selection-args: --packages-select tethered_navigation
           colcon-mixin-name: release
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
 
