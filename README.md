@@ -15,7 +15,7 @@ This project implements a comprehensive **Cooperative Swarm Navigation Framework
 - **Aggregated Analytics**: Swarm-level metrics including workload balance and average tether stress
 
 ### High-Fidelity Simulation
-- **Procedurally Generated Environments**: SDF-based worlds for swarm scenarios
+- **SDF-Based Worlds**: Custom environments for swarm scenarios
 - **Physical Tether Model**: 40-link chain simulation with realistic physics
 - **Dynamic Obstacles**: Actor-based moving obstacles for realistic scenarios
 - **Noisy Sensors**: LiDAR, IMU, and RGB-D camera with realistic noise models
@@ -40,22 +40,19 @@ This project implements a comprehensive **Cooperative Swarm Navigation Framework
 
 ```
 Unified-Navigation-Framework-for-Tethered-Robots/
-├── src/tethered_navigation/      # Main ROS 2 navigation package
-│   ├── config/                   # EKF, laser merger, Nav2 params
-│   ├── launch/                   # Launch files for scenarios
-│   ├── msg/                      # Custom message definitions
-│   ├── scripts/                  # Python nodes and analyzers
-│   └── worlds/                   # SDF world files
+├── src/
+│   └── tethered_navigation/      # Main ROS 2 navigation package
+│       ├── config/               # EKF, laser merger, Nav2 params
+│       ├── launch/               # Launch files for scenarios
+│       ├── msg/                  # Custom message definitions
+│       ├── scripts/              # Python nodes and analyzers
+│       └── worlds/               # SDF world files
 ├── mixed_reality_ws/             # Hardware validation workspace
-│   ├── src/                      # Hardware interface nodes
-│   ├── log/                      # Experiment logs
-│   └── analyze_data.py           # Hardware data analyzer
+│   └── src/                      # Hardware interface nodes (tether detection, bridge)
 ├── results/                      # Simulation results and analysis
 │   ├── aggregated_results/       # Paper-ready statistics
 │   └── quick_analysis/           # Summary plots and CSV
-├── paper_submission/             # Figures and data for publication
-└── assets/figure_data/           # MATLAB figure generation scripts
-
+└── paper_submission/             # Figures and data for publication
 ```
 
 ## System Requirements
@@ -75,18 +72,14 @@ Unified-Navigation-Framework-for-Tethered-Robots/
 
 ## Installation
 
-### 1. ROS 2 Workspace Setup
+### 1. Clone the Repository
 ```bash
-mkdir -p ~/tethered_ws/src
-cd ~/tethered_ws
-colcon build
-source install/setup.bash
+cd ~/tethered_ws/src
+git clone https://github.com/Chandan118/Unified-Navigation-Framework-for-Tethered-Robots.git
 ```
 
 ### 2. Build the Navigation Package
 ```bash
-cd ~/tethered_ws/src/tethered_navigation
-rosdep install --from-paths . --ignore-src -r -y
 cd ~/tethered_ws
 colcon build --packages-select tethered_navigation
 source install/setup.bash
@@ -123,13 +116,13 @@ ros2 launch tethered_navigation scenario_expansion_cooperative.launch.py
 ### Analyzing Results
 ```bash
 # Analyze aggregated results
-python3 scripts/analyze_results.py
+python3 src/tethered_navigation/scripts/analyze_results.py
 
 # Generate quick summary
-python3 scripts/quick_analysis.py
+python3 src/tethered_navigation/scripts/quick_analysis.py
 
 # Aggregate multiple experiment runs
-python3 scripts/aggregate_results.py
+python3 src/tethered_navigation/scripts/aggregate_results.py
 ```
 
 ### Mixed Reality Validation
@@ -168,8 +161,8 @@ python3 mixed_reality_ws/analyze_data.py
 ┌─────────────────────────────────────────────────────────────┐
 │                    Gazebo Simulation / Hardware             │
 │  ┌──────────┐  ┌──────────┐  ┌──────────────────────────┐   │
-│  │  ATLAS-T │  │  Tether  │  │  Swarm Coordination      │   │
-│  │  Robots  │  │  Chain   │  │  (Cooperative Protocol)   │   │
+│  │  ATLAS-T │  │  Tether  │  │  Swarm Coordination     │   │
+│  │  Robots  │  │  Chain   │  │  (Cooperative Protocol)  │   │
 │  └──────────┘  └──────────┘  └──────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
            │                    │                       │
