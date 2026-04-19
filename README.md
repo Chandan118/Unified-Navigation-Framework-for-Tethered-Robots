@@ -1,20 +1,27 @@
 # Unified Navigation Framework for Tethered Robots
-## ROS 1 Noetic Implementation (Single & Swarm)
+## ROS 2 Navigation Stack with Mixed Reality Validation
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18522121.svg)](https://doi.org/10.5281/zenodo.18522121)
 
-This project implements a comprehensive simulation of the Adaptive Hybrid Navigation Framework for Tethered Robots, extended for **Swarm Robotics** (up to 10 robots) for high-level coordination and performance analysis.
+This project implements a comprehensive **Cooperative Swarm Navigation Framework for Tethered Robots**, featuring ROS 2 navigation with real-world hardware validation and mixed reality experiments.
 
-## Features
+## Key Features
+
+### Cooperative Swarm Navigation
+- **Centralized Task Allocation**: Multi-robot coordination with up to 10 robots
+- **Cooperative Scenarios**: Bottleneck, crossing paths, and expansion area navigation
+- **Yielding Decision Protocol**: Robots dynamically yield based on mission priority and tether tension
+- **Namespace Isolation**: Full topic/node namespacing for each robot (`/robot_1`, `/robot_2`, etc.)
+- **Aggregated Analytics**: Swarm-level metrics including workload balance and average tether stress
 
 ### High-Fidelity Simulation
-- **Procedurally Generated Environments**: Perlin noise-based warehouse world generation
-- **Physical Tether Model**: 40-link chain simulation with realistic physics and damping
+- **Procedurally Generated Environments**: SDF-based worlds for swarm scenarios
+- **Physical Tether Model**: 40-link chain simulation with realistic physics
 - **Dynamic Obstacles**: Actor-based moving obstacles for realistic scenarios
 - **Noisy Sensors**: LiDAR, IMU, and RGB-D camera with realistic noise models
 
 ### Hybrid Navigation System
-1. **Sensor Fusion**: Extended Kalman Filter with dynamic weight adjustment (Eq. 8-9)
+1. **Sensor Fusion**: Extended Kalman Filter with dynamic weight adjustment
 2. **Scene Recognition**: CNN-based complexity analysis
 3. **Hybrid Planner**: Three-state FSM
    - Motion-to-Goal
@@ -24,246 +31,208 @@ This project implements a comprehensive simulation of the Adaptive Hybrid Naviga
 5. **Genetic Algorithm Optimizer**: Automatic parameter tuning
 6. **Tether Awareness**: Real-time tension calculation and snag detection
 
-### Swarm Robotics Extension
-- **Multi-Robot Coordination**: Centralized task allocation for 10 robots
-- **Namespace Isolation**: Full topic/node namespacing for each robot (`/robot_1`, `/robot_2`, etc.)
-- **Proximity Monitoring**: Real-time inter-robot spacing and collision warnings
-- **Swarm Data Logging**: Unified telemetry collection for all robots into a single CSV
-- **Aggregated Analytics**: Swarm-level metrics including workload balance and average tether stress
-- **Mission Management**: New `atlas_mission_control` package for high-level state monitoring and emergency handling
+### Mixed Reality Validation
+- **Hardware-in-the-Loop**: Jetson Nano-based real robot experiments
+- **Protocol Validation**: Task 1 (velocity tracking) and Task 2 (trajectory following)
+- **Performance Metrics**: Real-world latency, accuracy, and stability measurements
 
-## Containerized Environment (Recommended)
+## Repository Structure
 
-To bypass dependency issues on modern hosts (e.g., Ubuntu 22.04), a Dockerized workflow is provided.
+```
+Unified-Navigation-Framework-for-Tethered-Robots/
+├── src/tethered_navigation/      # Main ROS 2 navigation package
+│   ├── config/                   # EKF, laser merger, Nav2 params
+│   ├── launch/                   # Launch files for scenarios
+│   ├── msg/                      # Custom message definitions
+│   ├── scripts/                  # Python nodes and analyzers
+│   └── worlds/                   # SDF world files
+├── mixed_reality_ws/             # Hardware validation workspace
+│   ├── src/                      # Hardware interface nodes
+│   ├── log/                      # Experiment logs
+│   └── analyze_data.py           # Hardware data analyzer
+├── results/                      # Simulation results and analysis
+│   ├── aggregated_results/       # Paper-ready statistics
+│   └── quick_analysis/           # Summary plots and CSV
+├── paper_submission/             # Figures and data for publication
+└── assets/figure_data/           # MATLAB figure generation scripts
 
-### Prerequisites
-- Docker
-- Docker Compose (v1.29+)
-
-### Quick Start with Docker
-```bash
-cd atlas_ws
-# Build and run the swarm simulation
-docker-compose up --build
 ```
 
-## System Requirements (Native)
+## System Requirements
 
-- **OS**: Ubuntu 20.04
-- **ROS**: ROS 1 Noetic
-- **Python**: 3.8+
-- **Gazebo**: 11.x
+### ROS 2 Navigation Stack
+- **OS**: Ubuntu 22.04 (Jammy)
+- **ROS**: ROS 2 Humble
+- **Python**: 3.10+
+- **Gazebo**: Gazebo Harmonic (Ignition)
+- **Navigation2**: Nav2 stack with EKF localization
 
-## Dependencies
-
-### ROS Packages
-```bash
-sudo apt-get install ros-noetic-desktop-full
-sudo apt-get install ros-noetic-gazebo-ros-pkgs
-sudo apt-get install ros-noetic-gazebo-ros-control
-sudo apt-get install ros-noetic-velodyne-simulator
-sudo apt-get install ros-noetic-hector-gazebo-plugins
-sudo apt-get install ros-noetic-robot-state-publisher
-sudo apt-get install ros-noetic-joint-state-publisher
-sudo apt-get install ros-noetic-xacro
-sudo apt-get install ros-noetic-tf
-sudo apt-get install ros-noetic-cv-bridge
-sudo apt-get install ros-noetic-rqt-plot
-```
-
-### Python Packages
-```bash
-pip3 install numpy scipy
-pip3 install scikit-fuzzy
-pip3 install opencv-python
-pip3 install noise  # For Perlin noise generation
-```
+### Hardware (for mixed reality)
+- NVIDIA Jetson Nano (or equivalent)
+- RP LiDAR A1/A2
+- USB Camera
+- Tethered mobile robot platform
 
 ## Installation
 
-### 1. Clone and Build
+### 1. ROS 2 Workspace Setup
 ```bash
-cd ~/Documents/Soft\ Computing\ Techniques/Journal\ of\ Field\ Robotics/manuscript/projecet/atlas_ws
-catkin_make
-source devel/setup.bash
+mkdir -p ~/tethered_ws/src
+cd ~/tethered_ws
+colcon build
+source install/setup.bash
 ```
 
-### 2. Generate World (Optional)
+### 2. Build the Navigation Package
 ```bash
-rosrun atlas_gazebo world_generator.py
+cd ~/tethered_ws/src/tethered_navigation
+rosdep install --from-paths . --ignore-src -r -y
+cd ~/tethered_ws
+colcon build --packages-select tethered_navigation
+source install/setup.bash
+```
+
+### 3. Install Python Dependencies
+```bash
+pip3 install numpy scipy opencv-python pandas matplotlib
 ```
 
 ## Usage
 
-### Swarm Simulation (10 Robots)
+### Swarm Simulation Experiments
+
+#### Cooperative Bottleneck Scenario
 ```bash
-# Launch centralized coordinator and all navigation stacks
-roslaunch hybrid_navigation master_swarm.launch
+# Cooperative navigation (robots yield to each other)
+ros2 launch tethered_navigation scenario_bottleneck_cooperative.launch.py
+
+# Baseline (no cooperation)
+ros2 launch tethered_navigation scenario_bottleneck_baseline.launch.py
 ```
 
-### Single Robot Simulation
+#### Crossing Paths Scenario
 ```bash
-# Launch complete single-robot system
-roslaunch hybrid_navigation master.launch
+ros2 launch tethered_navigation scenario_crossing_cooperative.launch.py
+```
+
+#### Expansion Area Scenario
+```bash
+ros2 launch tethered_navigation scenario_expansion_cooperative.launch.py
 ```
 
 ### Analyzing Results
-After running the simulation, data is saved in the `results/` folder. Use the analyzer to generate reports and plots:
 ```bash
-python3 result_analyzer.py
+# Analyze aggregated results
+python3 scripts/analyze_results.py
+
+# Generate quick summary
+python3 scripts/quick_analysis.py
+
+# Aggregate multiple experiment runs
+python3 scripts/aggregate_results.py
 ```
-*Note: The analyzer automatically detects if data is single-robot or multi-robot.*
 
-## Monitoring and Visualization
+### Mixed Reality Validation
 
-### RViz
-- Robot model with tether visualization
-- LiDAR point cloud
-- Color-coded tether (Green=low tension, Yellow=medium, Red=high/snagged)
-- Navigation path
+#### Task 1: Velocity Tracking
+```bash
+./mixed_reality_ws/run_task1.sh
+```
 
-### RQT Plot
-Monitor in real-time:
-- `/tether_status/length` - Tether length
-- `/tether_status/tension` - Tether tension
-- `/scene_complexity/complexity_score` - Scene complexity
+#### Task 2: Trajectory Following
+```bash
+./mixed_reality_ws/run_task2.sh
+```
 
-### Topics
+#### Analyze Hardware Data
+```bash
+python3 mixed_reality_ws/analyze_data.py
+```
 
-**Subscribed:**
-- `/scan` - LaserScan data
-- `/odom` - Odometry
-- `/imu/data` - IMU data
-- `/camera/color/image_raw` - RGB camera
-- `/move_base_simple/goal` - Navigation goal
+## Performance Metrics
 
-**Published:**
-- `/cmd_vel` - Velocity commands
-- `/tether_status` - Tether state
-- `/scene_complexity` - Scene analysis
-- `/fused_pose` - Sensor-fused pose
-- `/tether_visualization` - Tether marker
-- `/planner_state` - Current FSM state
+### Simulation Metrics
+- **Path Efficiency (PLR %)**: Ratio of Euclidean distance to actual traveled path
+- **Inferred Collision Rate**: Detection of tension spikes per meter
+- **Entanglement Risk**: Recovery state frequency and high-tension duration
+- **Cooperation Rate**: Percentage of successful yielding events
+
+### Hardware Metrics
+- **Tracking Error**: Mean and max deviation from reference trajectory
+- **Jetson Latency**: Real-time processing delay
+- **Velocity Accuracy**: Command vs. actual velocity correlation
 
 ## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Gazebo Simulation                    │
-│  ┌──────────┐  ┌──────────┐  ┌────────────────────┐   │
-│  │  ATLAS-T │  │  Tether  │  │  Dynamic Obstacles │   │
-│  │  Robot   │  │  Chain   │  │     (Actors)       │   │
-│  └──────────┘  └──────────┘  └────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
-           │                    │                  │
-           ▼                    ▼                  ▼
-    ┌──────────┐        ┌──────────────┐   ┌────────────┐
-    │  Sensors │        │    Tether    │   │   Scene    │
-    │  Fusion  │        │   Tension    │   │Recognition │
-    │   (EKF)  │        │     Node     │   │   (CNN)    │
-    └──────────┘        └──────────────┘   └────────────┘
-           │                    │                  │
-           └────────────────────┴──────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Gazebo Simulation / Hardware             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────────────┐   │
+│  │  ATLAS-T │  │  Tether  │  │  Swarm Coordination      │   │
+│  │  Robots  │  │  Chain   │  │  (Cooperative Protocol)   │   │
+│  └──────────┘  └──────────┘  └──────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+           │                    │                       │
+           ▼                    ▼                       ▼
+    ┌──────────┐        ┌──────────────┐        ┌─────────────┐
+    │  Sensors │        │    Tether    │        │  Swarm      │
+    │  Fusion  │        │   Tension    │        │  Coordinator│
+    │   (EKF)  │        │     Node     │        │             │
+    └──────────┘        └──────────────┘        └─────────────┘
+           │                    │                       │
+           └────────────────────┴───────────────────────┘
                               │
                               ▼
                     ┌──────────────────┐
                     │  Hybrid Planner  │
-                    │      (FSM)       │
+                    │    (FSM + Nav2)  │
                     └──────────────────┘
                               │
                               ▼
                     ┌──────────────────┐
                     │ Fuzzy Controller │
-                    │   (125 Rules)    │
+                    │   + Yielding     │
                     └──────────────────┘
                               │
                               ▼
                          /cmd_vel
 ```
 
+## Scenario Descriptions
+
+### Bottleneck Scenario
+Robots navigate through a narrow passage. Cooperative mode enables robots to yield based on mission priority, reducing congestion and improving overall throughput.
+
+### Crossing Paths Scenario
+Multiple robots traverse intersecting paths. The cooperative protocol coordinates robot timing to prevent collisions.
+
+### Expansion Area Scenario
+Robots move from a confined area into an open space. Coordination ensures orderly expansion without collision.
+
 ## Parameter Tuning
 
-### Fuzzy Controller (`fuzzy_controller_node`)
-- `linear_speed`: Base linear velocity (default: 0.5 m/s)
-- `max_angular_speed`: Maximum angular velocity (default: 1.0 rad/s)
-- `safety_distance`: Safety margin from obstacles (default: 1.0 m)
+### Swarm Coordinator (`swarm_coordinator.py`)
+- `cooperation_enabled`: Enable/disable yielding protocol
+- `yield_threshold`: Tension level to trigger yielding
+- `mission_priority_offset`: Priority weight for mission urgency
 
-### Hybrid Planner (`hybrid_planner_node`)
-- `obstacle_threshold`: Distance to trigger bug algorithm (default: 1.5 m)
-- `wall_follow_distance`: Target distance for wall following (default: 0.7 m)
-- `max_tether_usage`: Max tether usage ratio (default: 0.95)
+### Navigation Stack (`nav2_params.yaml`)
+- `controller_frequency`: Control loop rate (default: 20 Hz)
+- `planner_frequency`: Path planning rate (default: 1 Hz)
+- `recovery_timeout`: Time before recovery actions (default: 5 s)
 
-### Tether Tension (`tether_tension_node`)
-- `max_tether_length`: Maximum tether length (default: 30.0 m)
+### Tether Tension (`tether_state_broadcaster.py`)
+- `max_tether_length`: Maximum tether length (default: 10.0 m)
 - `tension_coefficient`: Tension calculation coefficient (default: 1.5)
-
-### GA Optimizer (`ga_optimizer_node`)
-- `population_size`: GA population size (default: 10)
-- `mutation_rate`: Mutation probability (default: 0.1)
-- `optimization_interval`: Evolution interval in seconds (default: 120)
-
-## Testing
-
-### Manual Navigation Test
-1. Launch the system
-2. Use RViz "2D Nav Goal" tool to set goals
-3. Observe tether visualization and state transitions
-4. Monitor rqt_plot for metrics
-
-### Autonomous Test
-```bash
-# Run predefined waypoint sequence
-rosrun hybrid_navigation waypoint_test.py
-```
-
-## Expected Behavior
-
-1. **Motion-to-Goal**: Robot moves directly toward goal when path is clear
-2. **Enhanced Bug**: When obstacle detected, robot follows wall while heading toward goal
-3. **Tether Recovery**: If tether approaches limit or snags, robot backs up toward base station
-4. **Color Coding**: Tether changes color based on tension (green→yellow→orange→red)
-
-## Troubleshooting
-
-### Robot doesn't move
-- Check `/cmd_vel` topic: `rostopic echo /cmd_vel`
-- Verify Gazebo physics: Robot should not be stuck in ground
-- Check tether: Excessive tension may prevent movement
-
-### Sensors not publishing
-- Verify Gazebo plugins are loaded
-- Check `rostopic list` for expected topics
-- Restart Gazebo if sensors freeze
-
-### Build errors
-- Ensure all dependencies are installed
-- Run `rosdep install --from-paths src --ignore-src -r -y`
-- Clean build: `catkin_make clean && catkin_make`
-
-### Python import errors
-- Check Python 3 compatibility
-- Install missing packages: `pip3 install <package>`
-- Verify node permissions: `chmod +x nodes/*.py`
-
-## Manuscript and Analysis
-
-The repository includes the latest research manuscript and MATLAB-based data analysis scripts:
-
-- **Integrated Analysis**: The Python `result_analyzer.py` has been updated to calculate core metrics (Path Efficiency, Collision Rate, Entanglement Risk) based on the mathematical models provided in the MATLAB scripts.
-
-## Advanced Performance Metrics
-
-The analysis framework now includes metrics derived from publication standards:
-1. **Path Efficiency (PLR %)**: Ratio of Euclidean distance to actual traveled path.
-2. **Inferred Collision Rate**: Detection of tension spikes and abrupt velocity changes per meter.
-3. **Entanglement Risk**: Evaluated based on recovery state frequency and high-tension duration.
+- `yielding_tension_threshold`: Tension to trigger robot yielding
 
 ## Citation
 
 If you use this code, please cite the following paper:
 
 ```text
-Chandan Sheikder, Unified Navigation Framework for Tethered Robots, 2026. DOI: 10.5281/zenodo.18522121
+Chandan Sheikder, Unified Navigation Framework for Tethered Robots, 2026.
+DOI: 10.5281/zenodo.18522121
 ```
 
 ## License
@@ -277,5 +246,6 @@ Chandan Sheikder - chandan@bit.edu.cn
 ## Acknowledgments
 
 - Based on research in Adaptive Hybrid Navigation for Tethered Robots
-- ROS Community for excellent documentation
+- ROS 2 Community for excellent documentation
+- Nav2 Stack contributors
 - Gazebo Simulator team

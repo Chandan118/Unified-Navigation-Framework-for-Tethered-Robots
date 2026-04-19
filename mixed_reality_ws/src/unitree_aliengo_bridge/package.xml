@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>unitree_aliengo_bridge</name>
+  <version>0.1.0</version>
+  <description>
+    ROS 2 bridge between swarm tether estimator and Unitree AlienGo robot.
+    Subscribes to /swarm_tether_states and implements yielding behavior.
+    Publishes cmd_vel to the robot and logs velocity data for analysis.
+  </description>
+  <maintainer email="chandan@formica.bot">Chandan</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>rclcpp_components</depend>
+  <depend>jsoncpp</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

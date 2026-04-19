@@ -1,0 +1,27 @@
+# Configuration for the laser_filters scan_to_scan_filter_chain node
+# This file defines a "chain" of filters to apply to incoming laser scans.
+# For our purpose, the chain contains only one filter: LaserScanMultiMerger.
+
+scan_filter_chain:
+  ros__parameters:
+    # Target frame for the output scan. Should be a fixed frame on the robot.
+    target_frame: "base_link"
+    
+    # How long to wait for transforms to become available (in seconds).
+    transform_timeout: 0.05
+    
+    # The list of filters to apply in order.
+    filter_names: ["merger"]
+
+    # Configuration for the 'merger' filter defined above.
+    merger:
+      name: "merger"
+      type: "laser_filters/LaserScanMultiMerger"
+      params:
+        # A space-separated list of the input topics.
+        # These MUST match the remapped topics from your RPLIDAR nodes in the launch file.
+        scan_topics: "/scan_front /scan_rear"
+
+        # Set to true if you want the output scan to have a constant angular resolution.
+        # This can be useful for some algorithms but might lose some data.
+        uniform_resolution: false

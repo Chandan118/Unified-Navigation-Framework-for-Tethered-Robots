@@ -1,0 +1,60 @@
+# Configuration file for the Extended Kalman Filter (EKF) node
+# from the robot_localization package.
+# This file fuses odometry from wheel encoders and orientation/velocity
+# data from an IMU to produce a smooth, filtered odometry estimate.
+
+ekf_filter_node:
+  ros__parameters:
+    # --- General Parameters ---
+    
+    # The frequency, in Hz, at which the filter will publish its output.
+    frequency: 10.0
+    
+    # Set to true if your robot only moves in the X-Y plane (2D).
+    two_d_mode: true
+    
+    # Determines whether to publish the transform from the `odom_frame` to the `base_link_frame`.
+    # This is essential for the rest of the system to know the robot's position.
+    publish_tf: true
+
+    # --- Frame Parameters ---
+    # The coordinate frames used by the filter. These should match your TF tree.
+    map_frame: map          # The world-fixed frame. Not used by this EKF instance, but required.
+    odom_frame: odom        # The frame for the filtered odometry output. The EKF will publish the odom->base_link transform.
+    base_link_frame: base_link # The robot's base frame, attached to the robot.
+    world_frame: odom       # The primary world-fixed frame for this instance.
+
+    # --- Sensor Inputs ---
+    # The EKF can fuse data from multiple sensors. Each is configured below.
+    # We will use two sensors: wheel odometry and IMU.
+
+    # SENSOR 0: Wheel Odometry from Arduino
+    # This provides linear and angular velocity estimates based on wheel encoder ticks.
+    # IMPORTANT: Your arduino_interface_node must publish to this topic.
+    # Currently, it does not publish odometry. You will need to add this functionality.
+    odom0: /wheel_odom
+    odom0_config:
+    # A 15-element boolean vector that specifies which variables from the message to use.
+    # Order is: [X, Y, Z, Roll, Pitch, Yaw, Vx, Vy, Vz, Vroll, Vpitch, Vyaw, Ax, Ay, Az]
+      [false, false, false,  # Do not use pose from wheel odometry (it drifts)
+       false, false, false,
+       true,  true,  false,  # Use X and Y linear velocities
+       false, false, true,   # Use Yaw angular velocity
+       false, false, false]
+    # Set to true if the velocities are in the robot's body frame (base_link).
+    # This is almost always the case for wheel encoders.
+    odom0_differential: false
+
+    # SENSOR 1: IMU
+    # This provides absolute orientation (roll, pitch, yaw) and angular velocity.
+    imu0: /imu/data
+    imu0_config:
+      [false, false, false,
+       false, false, false,
+       false, false, false,
+       false, false, false,
+       false, false, false]
+    # Set to false because the IMU provides an absolute orientation, not a change in orientation.
+    imu0_differential: false
+    # This is crucial for IMUs with accelerometers. It removes the effect of gravity.
+    imu0_remove_gravitational_acceleration: true

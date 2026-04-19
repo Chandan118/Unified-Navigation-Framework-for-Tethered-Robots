@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tethered_robot">
+
+  <!-- 
+    This file describes the physical layout of your robot.
+    The 'base_link' is the conceptual center of the robot, usually on the ground
+    directly below the center of the chassis. All other parts are defined
+    relative to this link.
+  -->
+
+  <!-- Constants for easy modification of robot dimensions -->
+  <xacro:property name="chassis_length" value="0.4"/>
+  <xacro:property name="chassis_width" value="0.3"/>
+  <xacro:property name="chassis_height" value="0.15"/>
+  <xacro:property name="wheel_radius" value="0.05"/>
+  <xacro:property name="wheel_width" value="0.02"/>
+  <xacro:property name="wheel_separation_x" value="0.2"/> <!-- Distance between front and rear wheels -->
+  <xacro:property name="wheel_separation_y" value="0.34"/> <!-- Distance between left and right wheels -->
+
+  <!-- =================================================================== -->
+  <!-- ========================= CORE COMPONENTS ========================= -->
+  <!-- =================================================================== -->
+
+  <!-- BASE LINK -->
+  <!-- This is the primary coordinate frame of the robot. It does not have a visual component. -->
+  <link name="base_link"/>
+  <link name="base_footprint"/>
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- CHASSIS LINK -->
+  <!-- This represents the main body of the robot. -->
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis_link"/>
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/> <!-- Position the chassis above the ground -->
+  </joint>
+
+  <link name="chassis_link">
+    <visual>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.2 0.4 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- =================================================================== -->
+  <!-- ========================= SENSOR MOUNTS ========================= -->
+  <!-- =================================================================== -->
+
+  <!-- IMU SENSOR LINK -->
+  <joint name="imu_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 ${chassis_height / 2}" rpy="0 0 0"/> <!-- Centered on top of the chassis -->
+  </joint>
+  <link name="imu_link"/>
+
+  <!-- FRONT LiDAR LINK -->
+  <joint name="front_lidar_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="front_lidar_link"/>
+    <!-- Positioned at the front edge, on top of the chassis -->
+    <origin xyz="${chassis_length / 2} 0 ${chassis_height / 2}" rpy="0 0 0"/>
+  </joint>
+  <link name="front_lidar_link"/>
+
+  <!-- REAR LiDAR LINK -->
+  <joint name="rear_lidar_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="rear_lidar_link"/>
+    <!-- Positioned at the rear edge, on top, and rotated 180 degrees -->
+    <origin xyz="-${chassis_length / 2} 0 ${chassis_height / 2}" rpy="0 0 3.14159"/>
+  </joint>
+  <link name="rear_lidar_link"/>
+
+  <!-- KINECT CAMERA LINK -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="camera_link"/>
+    <!-- Positioned near the front, on top -->
+    <origin xyz="${chassis_length * 0.4} 0 ${chassis_height * 0.45}" rpy="0 0 0"/>
+  </joint>
+  <link name="camera_link"/>
+  
+  <!-- ULTRASONIC SENSOR LINK (Example, if you need it for visualization) -->
+  <joint name="ultrasonic_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="ultrasonic_link"/>
+    <!-- Positioned at the very front of the chassis -->
+    <origin xyz="${chassis_length / 2} 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="ultrasonic_link"/>
+
+  <!-- =================================================================== -->
+  <!-- ========================== ACTUATORS (WHEELS) ===================== -->
+  <!-- =================================================================== -->
+
+  <!-- XACRO Macro for creating wheels to reduce code duplication -->
+  <xacro:macro name="wheel" params="prefix side_y">
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <!-- Place wheels relative to the base_link center -->
+      <origin xyz="0 ${side_y} 0" rpy="-1.5707 0 0"/>
+      <axis xyz="0 0 1"/> <!-- Axis of rotation -->
+    </joint>
+    
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Instantiate the four wheels using the macro -->
+  <!-- NOTE: This is a simplified 4WD model. A real differential drive
+       would only have two powered wheels, but for TF this is fine. -->
+  <xacro:wheel prefix="left"  side_y="${wheel_separation_y / 2}" />
+  <xacro:wheel prefix="right" side_y="-${wheel_separation_y / 2}" />
+
+</robot>

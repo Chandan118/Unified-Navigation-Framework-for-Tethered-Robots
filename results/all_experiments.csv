@@ -1,0 +1,2 @@
+scenario,mode,num_robots,success,entanglements,avg_tension,max_tension,traversal_time,yielding_events,crossing_events,all_at_goal,duration
+bottleneck,cooperative,5,False,0,11.13750968870932,13.592350201568136,-1.0,0,0,False,0
