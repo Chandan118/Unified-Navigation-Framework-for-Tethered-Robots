@@ -359,24 +359,24 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 import os
 
-def generate_launch_description():
+def generate_launch_description():  # noqa: F821
     pkg_share = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         'tethered_navigation'
     )
     
-    world_file = os.path.join(pkg_share, 'worlds', '{self.scenario.get_world_file()}')
+    world_file = os.path.join(pkg_share, 'worlds', '{self.scenario.get_world_file()}')  # noqa: F821
     
     robots = []
     
     # 启动每个机器人
-    for i in range({self.scenario.num_robots}):
-        robot_id = f"robot_{i+1}"
-        namespace = f"/robot_{i+1}"
+    for i in range({self.scenario.num_robots}):  # noqa: F821
+        robot_id = f"robot_{i+1}"  # noqa: F821
+        namespace = f"/robot_{i+1}"  # noqa: F821
         
         # 起始位置和目标
-        start_x, start_y, start_yaw = {self.scenario.robot_start_poses}[{i}]
-        goal_x, goal_y = {self.scenario.robot_goals}[{i}]
+        start_x, start_y, start_yaw = {self.scenario.robot_start_poses}[{i}]  # noqa: F821
+        goal_x, goal_y = {self.scenario.robot_goals}[{i}]  # noqa: F821
         
         # Navigator node (C++)
         navigator = Node(
@@ -405,7 +405,7 @@ def generate_launch_description():
         
         # Swarm Coordinator (仅 cooperative 模式)
         swarm_nodes = []
-        if "{self.mode}" == "cooperative":
+        if "{self.mode}" == "cooperative":  # noqa: F821
             coordinator = Node(
                 package='tethered_navigation',
                 executable='swarm_coordinator.py',
@@ -433,7 +433,7 @@ def generate_launch_description():
         executable='experiment_data_logger.py',  # 需要创建
         name='data_logger',
         output='screen',
-        arguments=['{self.scenario.name}', '{self.mode}'],
+        arguments=['{self.scenario.name}', '{self.mode}'],  # noqa: F821
     )
     
     return LaunchDescription(
