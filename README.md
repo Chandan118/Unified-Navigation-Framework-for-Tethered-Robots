@@ -1,3 +1,5 @@
+[![CI](https://github.com/Chandan118/Unified-Navigation-Framework-for-Tethered-Robots/actions/workflows/python-package.yml/badge.svg)](https://github.com/Chandan118/Unified-Navigation-Framework-for-Tethered-Robots/actions/workflows/python-package.yml)
+
 # Unified Navigation Framework for Tethered Robots
 ## ROS 2 Navigation Stack with Mixed Reality Validation
 
