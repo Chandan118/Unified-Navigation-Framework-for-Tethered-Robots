@@ -33,9 +33,10 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install scikit-fuzzy numpy opencv-python
-          # Install rosidl_adapter required for custom message generation
+          # Install rosidl packages required for custom message generation
           sudo apt-get update
-          sudo apt-get install -y python3-rosidl-adapter ros-humble-rosidl-adapter
+          sudo apt-get install -y ros-humble-rosidl-default-generators ros-humble-rosidl-default-runtime
+          python3 -m pip install rosidl-adapter
 
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.3
