@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@v0.7
@@ -33,6 +33,9 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install scikit-fuzzy numpy opencv-python
+          # Install rosidl_adapter required for custom message generation
+          sudo apt-get update
+          sudo apt-get install -y python3-rosidl-adapter ros-humble-rosidl-adapter
 
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.3
@@ -52,10 +55,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -63,12 +66,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
