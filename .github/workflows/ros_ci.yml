@@ -24,27 +24,35 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup ROS 2
+      - name: Setup ROS 2 Humble
         uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: humble
 
-      - name: Install Python dependencies
+      - name: Install dependencies and build
+        shell: bash
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install scikit-fuzzy numpy opencv-python
-          # Install rosidl packages required for custom message generation
+          source /opt/ros/humble/setup.bash
           sudo apt-get update
-          sudo apt-get install -y ros-humble-rosidl-default-generators ros-humble-rosidl-default-runtime
-          python3 -m pip install rosidl-adapter
+          sudo apt-get install -y python3-pip python3-colcon-common-extensions
+          python3 -m pip install scikit-fuzzy numpy opencv-python
 
-      - name: Build and Test
-        uses: ros-tooling/action-ros-ci@v0.3
-        with:
-          target-ros2-distro: humble
-          package-selection-args: --packages-select hybrid_navigation_msgs hybrid_navigation
-          colcon-mixin-name: release
-          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          # Create colcon workspace with our source
+          mkdir -p /tmp/ros_ws/src
+          cp -r src/hybrid_navigation_msgs /tmp/ros_ws/src/
+          cp -r src/hybrid_navigation /tmp/ros_ws/src/
+
+          # Install rosdep dependencies
+          cd /tmp/ros_ws
+          rosdep update --rosdistro=humble
+          rosdep install --from-paths src --ignore-src -r -y
+
+          # Build
+          colcon build --packages-select hybrid_navigation_msgs hybrid_navigation
+          
+          # Test
+          colcon test --packages-select hybrid_navigation_msgs hybrid_navigation
+          colcon test-result --verbose
 
   publish_image:
     runs-on: ubuntu-22.04
